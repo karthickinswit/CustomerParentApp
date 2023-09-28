@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState ,useEffect} from 'react';
 import {
   View,
   Text,
@@ -25,20 +25,75 @@ import { messageService } from '../services/websocket';
 import { GlobalContext } from '../utils/globalupdate';
 import { timeConversion } from '../utils/utilities';
 import { MenuProvider } from 'react-native-popup-menu';
-import { closeChat } from '../services/api';
-
+import { chatCreationApi,getChatInfo } from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Variables from '../utils/variables';
 let { height } = Dimensions.get('window');
+
 let flatList = React.useRef(null);
 
-const IndividualChat = route => {
+const IndividualChat =  () => {
   const value = React.useContext(GlobalContext);
-  let chatId = route.route.params.chatId;
-  let chat = value.activeChatList.current.chats.find(response => {
-    return response.chatId == chatId;
-  });
+  
+  const [chatId,setChatId] = useState('');
+  const [isValidchat,setIsValidChat]=useState(false) ;
+const[chat,setChat] = useState({})
+  //let chatId = route.route.params.chatId;
+  // let chat = value.activeChatList.current.chats.find(response => {
+  //   return response.chatId == chatId;
+  // });
   const [imageSource, setImageSource] = React.useState(null);
   const [modalVisible, setModalVisible] = React.useState(false);
+useEffect( ()=>{
+  chatIdValidation();
+},[])
 
+
+newChatCreation=()=>{
+  chatCreationApi(Variables.EID)
+  .then(async data => {
+    console.log('Chat Creation data-->', data);
+    if(data.status){
+      let newChatId = data.response.chatId
+      setChatId(newChatId);
+      await AsyncStorage.setItem('chatId',newChatId);
+      await chatIdValidation();
+    }
+    else {console.log(data);}
+    
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+const chatIdValidation=async ()=>{
+  let  storedChatId =  await AsyncStorage.getItem('chatId');
+  if(!storedChatId){
+    await newChatCreation();
+  }
+  else {
+    getChatInfo(Variables.EID,storedChatId)
+.then(async data => {
+  console.log('Chat checking data-->', data);
+  if(data.chat){
+    let res= data.chat;
+    if(res.state!=3){
+      setIsValidChat(true);
+      setChat(res);
+      console.log("chat res--> ",res);
+    }
+    else {
+      setIsValidChat(false);
+      await newChatCreation();
+
+    }
+    
+  }
+  else {console.log(data);}
+  
+})
+.catch(error => console.error('Error:', error));
+  }
+}
 
   const launchImagePicker = () => {
     let options = {
@@ -159,10 +214,10 @@ const IndividualChat = route => {
 
   const ChatHeader = () => {
     const navigation = useNavigation();
-
-    if (!chat) {
-      return <ActivityIndicator />;
-    } else {
+console.log("Chat header",chat);
+    useEffect(()=>{
+      console.log("Chat header",chat);
+    },[isValidchat]);
       return (
         <>
           <SafeAreaView style={{ backgroundColor: 'white' }}>
@@ -217,7 +272,7 @@ const IndividualChat = route => {
           </SafeAreaView>
         </>
       );
-    }
+    
   };
 
   const ChatBody = () => {
@@ -274,7 +329,7 @@ const IndividualChat = route => {
         </View>
       );
     };
-    if (chat) {
+    
       return (
         <FlatList
           data={chat.messages}
@@ -287,13 +342,9 @@ const IndividualChat = route => {
           onContentSizeChange={() => flatList.current.scrollToEnd()}
         />
       );
-    } else {
-      return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color="#217eac" />
-        </View>
-      );
-    }
+  
+      
+    
   };
 
   const ChatFooter = () => {
@@ -390,11 +441,19 @@ const IndividualChat = route => {
   };
 
   return (
+    isValidchat ? (
     <MenuProvider>
       <ChatHeader />
       <ChatBody />
       <ChatFooter />
     </MenuProvider>
+    ) : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <ActivityIndicator
+      hidesWhenStopped={isValidchat}
+      size="large"
+      color="#217eac"></ActivityIndicator>
+    <Text style={{ marginTop: 10 }}>Loading Chat</Text>
+  </View>
   );
 };
 

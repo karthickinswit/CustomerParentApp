@@ -44,15 +44,17 @@ export const ChatScreen = ({ route }) => {
   Variables.API_URL = route.params.userDetails.baseUrl;
   Variables.EID = route.params.userDetails.eId;
   Variables.AgentId = route.params.userDetails.userId;
+  Variables.MobileNum = route.params.userDetails.customerId;
+  Variables.cCode = route.params.userDetails.countryCode;
   Variables.ACTIVE_CHATS = '/e/enterprise/chat/summary';
   Variables.CLOSED_CHATS = '/e/enterprise/chat/history?state=3';
   // Variables.SUSPENDED_CHATS =
   //   '/e/enterprise/chat/history?state=5&agent=' + Variables.AgentId.toString();
 
   const setToken = async () => {
-    try {
+    
       console.log("register token call 2");
-      registerApi('8190083902','+91',100)
+      registerApi(Variables.MobileNum ,Variables.cCode,Variables.EID)
         .then(async data => {
           console.log("register token api--> ", data);
           var token = data.response.token;
@@ -63,9 +65,7 @@ export const ChatScreen = ({ route }) => {
           }
         })
         .catch(error => console.error('Error:', error));
-    } catch (error) {
-      console.log('Error in register Token', error);
-    }
+    
   };
 
     const checkToken = async () => {
@@ -74,7 +74,7 @@ export const ChatScreen = ({ route }) => {
       console.log("Token -->",storedToken);
       if(storedToken){
         checkTokenApi()
-      .then(data => {
+      .then(async data => {
         console.log("Check token api--> ",data);
         if(data==true){
           setIsTokenValid(true);
@@ -85,8 +85,14 @@ export const ChatScreen = ({ route }) => {
           }
 
         }
+        else if(data==false){
+          await setToken();
+
+        }
         else {
           console.log("Check Toke False",data);
+         
+
         }
       })
       .catch(error => console.error('Error:', error));
@@ -129,15 +135,18 @@ export const ChatScreen = ({ route }) => {
 
       if (obj.action === 'onOpen') {
         var content = obj.content[0];
-        if (content.response && content.response.enterprise) {
-          var enterprise = content.response.enterprise;
-          console.log(enterprise);
-          newChatCount.current = enterprise.unPickedCount;
-          missedChatCount.current = enterprise.missedCount;
-          transferredChatCount.current = enterprise.transferredCount;
-          invitedChatCount.current = enterprise.invitedCount;
+        if (content.response && content.response.customer) {
           setSocketConnection(true);
+          console.log("Connection is true");
+          // var enterprise = content.response.enterprise;
+          // console.log(enterprise);
+          // newChatCount.current = enterprise.unPickedCount;
+          // missedChatCount.current = enterprise.missedCount;
+          // transferredChatCount.current = enterprise.transferredCount;
+          // invitedChatCount.current = enterprise.invitedCount;
+         
         }
+       
       } else if (obj.action === 'customerStartChat') {
         newChatCount.current = newChatCount.current + 1;
         setSocketResponse(obj);
@@ -214,27 +223,21 @@ export const ChatScreen = ({ route }) => {
   return isSocketConnected ? (
     <GlobalContext.Provider
       value={{
-        activeChatList,
-        newChatCount,
-        missedChatCount,
-        transferredChatCount,
-        invitedChatCount,
-        assignedChatCount,
-        closedChatList,
+       
       }}>
       <NavigationContainer independent={true}>
         <Stack.Navigator>
-          <Stack.Screen name="ChatListPage" options={{ headerShown: false }}>
+          {/* <Stack.Screen name="ChatListPage" options={{ headerShown: false }}>
             {props => <ChatListPage {...props} />}
-          </Stack.Screen>
+          </Stack.Screen> */}
           <Stack.Screen name="IndividualChat" options={{ headerShown: false }}>
-            {props => <IndividualChat {...props} />}
+            {props => <IndividualChat/>}
           </Stack.Screen>
-          <Stack.Screen name="Conversation" options={{ headerShown: false }}>
+          {/* <Stack.Screen name="Conversation" options={{ headerShown: false }}>
             {props => (
               <Conversation {...props} initialParams={{ chatUser, users }} />
             )}
-          </Stack.Screen>
+          </Stack.Screen> */}
           {/* <Stack.Screen name="MenuExample" options={{ headerShown: false }}>
             {props => <MenuExample {...props} />}
           </Stack.Screen> */}

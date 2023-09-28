@@ -14,7 +14,9 @@ import {
   import { ChatScreen } from 'chatcustomersdk/src/utils/globalupdate';
   import { NavigationContainer, useNavigation } from '@react-navigation/native';
   import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
+  import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+  import RNFS from 'react-native-fs';
+  import SoundRecorder from 'react-native-sound-recorder';
   const Stack = createNativeStackNavigator();
   export default function CustomerParent(){
 
@@ -56,6 +58,17 @@ import {
   const [isError, setIsError] = useState(false);
   const [authToken, setAuthToken] = useState('');
   const navigation = useNavigation();
+  const audioRecorderPlayer = new AudioRecorderPlayer();
+  const [state,setState]=useState({});
+
+  const [recordSecs, setRecordSecs] = useState(0);
+  const [recordTime, setRecordTime] = useState('00:00');
+  const [currentPositionSec, setCurrentPositionSec] = useState(0);
+  const [currentDurationSec, setCurrentDurationSec] = useState(0);
+  const [playTime, setPlayTime] = useState('00:00');
+  const [duration, setDuration] = useState('00:00');
+
+
 
   const ValidateEmail = customerId => {
     const regex =
@@ -63,45 +76,124 @@ import {
     return regex.test(customerId.toLowerCase());
   };
 
+//  const onStartRecord = async () => {
+   const recordingPath = RNFS.DocumentDirectoryPath + '/newfile.mp3';
+//   console.log(recordingPath);
+//     //const result = await audioRecorderPlayer.startRecorder();
+//     // audioRecorderPlayer.addRecordBackListener((e) => {
+   
+//     //     recordSecs= e.currentPosition;
+//     //     recordTim= audioRecorderPlayer.mmssss(
+//     //       Math.floor(e.currentPosition),
+//     //     );
+      
+      
+//     // });
+//     audioRecorderPlayer.startRecorder(recordingPath).then((result) => {
+//       console.log(result);
+//     });
+   // console.log(result);
+  //   return;
+  // };
+  // onStopRecord = async () => {
+  // //   const result = await audioRecorderPlayer.stopRecorder();
+  // // audioRecorderPlayer.removeRecordBackListener();
+    
+  // //     recordSecs= 0;
+    
+  // //   console.log(result);
+  // audioRecorderPlayer.stopRecorder().then((result) => {
+  //   console.log(result);
+  // });
+ 
+  // };
+
+////////////////////////////////////////////////////////
+
+
+// program to generate random strings
+
+// declare all characters
+const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+function generateString(length) {
+    let result = '';
+    const charactersLength = characters.length;
+    for ( let i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result;
+}
+const onStartRecord = async () => {
+  // const result = await audioRecorderPlayer.startRecorder(SoundRecorder.PATH_DOCUMENT +'/'+generateString(7)+'.mp3',)
+  //   audioRecorderPlayer.addRecordBackListener((e) => {
+  //     console.log(e);
+  //     setRecordSecs(e.current_position);
+  //     setRecordTime(audioRecorderPlayer.mmssss(Math.floor(e.current_position)));
+  //   });
+  //   console.log(result);
+  // const result = await audioRecorderPlayer.startRecorder();
+  // console.log(result);
+  SoundRecorder.start(RNFS.DownloadDirectoryPath +'/'+generateString(7)+'.mp3')
+    .then(function() {
+        console.log('started recording');
+    });
+};
+
+const onStopRecord = async () => {
+  
+  // const result = await audioRecorderPlayer.stopRecorder();
+  // audioRecorderPlayer.removeRecordBackListener();
+  
+  // setRecordSecs(0);
+  // console.log(result);
+  // const result = await audioRecorderPlayer.stopRecorder();
+  // setRecordSecs(0);
+  // console.log(result);
+  SoundRecorder.stop()
+    .then(function(result) {
+        console.log('stopped recording, audio file saved at: ' + result.path);
+    });
+};
+
+const onStartPlay = async () => {
+  console.log('onStartPlay');
+    const msg = await audioRecorderPlayer.startPlayer();
+    console.log(msg);
+    audioRecorderPlayer.addPlayBackListener((e) => {
+      setCurrentPositionSec(e.current_position);
+      setCurrentDurationSec(e.duration);
+      setPlayTime(audioRecorderPlayer.mmssss(Math.floor(e.current_position)));
+      setDuration(audioRecorderPlayer.mmssss(Math.floor(e.duration)));
+    });
+};
+
+const onPausePlay = async () => {
+  await audioRecorderPlayer.pausePlayer();
+};
+
+const onStopPlay = () => {
+  console.log('onStopPlay');
+    audioRecorderPlayer.stopPlayer();
+    audioRecorderPlayer.removePlayBackListener();
+};
+///////////////////////////////////////////////////////
+
   const HandleLogin = async () => {
   console.log("Handl Login");
-    setIsLoading(true);
-    setIsError(false);
-    if ((!ValidateEmail(customerId)) || customerId == '') {
-      setIsLoading(false);
-    } else if (eId.length < 2) {
-      setIsLoading(false);
-    } else {
-        if(customerId){
-            const propDetails = {
-                customerId: '8190083902',
-                countryCode : '+91',
-                eId: '103',
-                baseUrl: 'https://qa.twixor.digital/moc',
-              };
-              console.log("Handl Login",propDetails);
-            navigation.navigate('ChatScreen', {
-                userDetails: propDetails,
-              });
-
-        
-    //   let res = await LoginApi();
-    //   if (res.status && res.response.token) {
-    //     setIsLoading(false);
-    //     setIsSuccess(true);
-    //     setAuthToken(res.response.token);
-        // setTimeout(() => {
-        // //   navigation.navigate('BlankPage', {
-        // //     customerId: customerId,
-        // //     token: authToken,
-        // //     uId: res.response.uId,
-        // //   });
-        // }, 10);
-      } else {
-        setIsError(true);
-        setIsLoading(false);
-      }
-    }
+ //   setIsLoading(true);
+   // setIsError(false);
+   const propDetails = {
+    customerId: '8190083902',
+    countryCode : '+91',
+    eId: 100,
+    baseUrl: 'https://qa.twixor.digital/moc',
+  };
+  console.log("Handl Login",propDetails);
+navigation.navigate('ChatScreen', {
+    userDetails: propDetails,
+  });
   };
 
   const handleRetry = () => {
@@ -181,8 +273,58 @@ import {
                   )}
                 </Text>
               </TouchableOpacity>
+              
             )}
+             <TouchableOpacity
+               style={styles.submitButton1 }
+                onPress={onStartRecord}>
+                <Text style={styles.submitButtonText}>
+                  start record
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.submitButton1 }
+                onPress={onStopRecord}>
+                <Text style={styles.submitButtonText}>
+                  Stop Record
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.submitButton1 }
+                onPress={onStartPlay}>
+                <Text style={styles.submitButtonText}>
+                  start play
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.submitButton1 }
+                onPress={onPausePlay}>
+                <Text style={styles.submitButtonText}>
+                  Pause
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.submitButton1 }
+                onPress={onStopPlay}>
+                <Text style={styles.submitButtonText}>
+                  Stop play
+                </Text>
+              </TouchableOpacity>
+              <Text>Record Time: {recordTime}</Text>
+      <Text>Play Time: {playTime}</Text>
+    
+              
+             {/* <TouchableOpacity onPress={onStartRecord} style={styles.submitButton}> <Text style={styles.submitButtonText}> Start Record </Text></TouchableOpacity> 
+      <TouchableOpacity onPress={onStopRecord} style={styles.submitButton}><Text style={styles.submitButtonText}>  Stop Record</Text></TouchableOpacity> 
+      <TouchableOpacity onPress={onStartPlay} style={styles.submitButton}><Text style={styles.submitButtonText}>  Start Play</Text></TouchableOpacity> 
+      <TouchableOpacity onPress={onPausePlay} style={styles.submitButton}><Text style={styles.submitButtonText}>  Pause Play</Text></TouchableOpacity> 
+      <TouchableOpacity onPress={onStopPlay} style={styles.submitButton}><Text style={styles.submitButtonText}>  Stop Play</Text></TouchableOpacity> 
+      <Text>Record Time: {recordTime}</Text>
+      <Text>Play Time: {playTime}</Text>
+      <Text>Duration: {duration}</Text> */}
+            
           </View>
+         
         </>
       );
   }

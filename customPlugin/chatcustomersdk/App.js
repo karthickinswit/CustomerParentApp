@@ -67,6 +67,8 @@ export default function ChatParent() {
   //   // Alert.alert('Alert', 'Button pressed ' + viewId);
   // };
 
+
+
   const HandleForgotPassword = () => {
     // forgot password function here
   };
@@ -152,6 +154,7 @@ export default function ChatParent() {
       <TouchableOpacity style={styles.button} onPress={HandleLogin}>
         <Text style={styles.buttonText}> Login </Text>
       </TouchableOpacity>
+     
       <TouchableOpacity
         style={styles.forgotPassword}
         onPress={HandleForgotPassword}>

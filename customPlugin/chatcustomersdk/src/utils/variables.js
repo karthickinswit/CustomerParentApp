@@ -5,9 +5,11 @@ class Variables {
   
   TOKEN = '+V/ifK5YbvyFOmsvo/XmNmrzax8E28DdBqM/TZffOH8fXZJCEMLuKFgxM9RtZPcl';
   API_URL = 'http';
-  EID = "";
+  EID = 0;
   CUSTOMER_DETAILS = {};
-  AgentId=0;
+  AgentId = 0;
+  MobileNum = '';
+  cCode = '';
 }
 
 export default Variables;

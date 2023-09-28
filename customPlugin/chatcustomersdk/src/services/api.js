@@ -119,20 +119,6 @@ export async function checkTokenApi() {
 
 export async function registerApi(mobileNumber,cCode,eId) {
   console.log("register token call 3");
-//   var urlencoded = new URLSearchParams();
-  
-// urlencoded.append("name", "8190083902");
-// urlencoded.append("phoneNumber", "8190083902");
-// urlencoded.append("countryCode", "+91");
-// urlencoded.append("countryAlpha2Code", "IN");
-// urlencoded.append("needVerification", "false");
-// urlencoded.append("byInvitation", "false");
-// urlencoded.append("subscribeToAll", "true");
-// urlencoded.append("enterprisesToSubscribe", "{\"eIds\":[100]}");
-// urlencoded.append("clearMsgs", "true");
-
-  
-            
 data = {
   'name': mobileNumber,
   'phoneNumber': mobileNumber,
@@ -141,7 +127,7 @@ data = {
   'needVerification': 'false',
   'byInvitation': 'false',
   'subscribeToAll': 'true',
-  'enterprisesToSubscribe': {"eIds":[eId]},
+  'enterprisesToSubscribe': JSON.stringify({"eIds":[eId]}),
   'clearMsgs': 'true' 
 };
   var body = Object.keys(data)
@@ -176,7 +162,62 @@ data = {
     xhr.send(body);
   });
 }
+export async function chatCreationApi(eId) {
+  console.log('chatCreationApi call-->', eId);
+  return new Promise((resolve, reject) => {
+    var url = Variables.API_URL + '/c/enterprises/' + eId + '/chat/create';
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    xhr.setRequestHeader('authentication-token', Variables.TOKEN);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const data = JSON.parse(xhr.responseText);
+        console.log('Api success');
+        if (data) {
+          resolve(data);
+        } else {
+          resolve([]);
+        }
+      } else {
+        console.log('Api Status', xhr.statusText);
+        reject(new Error(xhr.statusText));
+      }
+    };
+    xhr.onerror = () => {
+      console.log('Api Error');
+      reject(new Error('Network error'));
+    };
+    xhr.send();
+  });
+}
+export async function getChatInfo(eId,chatId) {
+  console.log('inner call');
 
+  return new Promise((resolve, reject) => {
+    var url = Variables.API_URL + '/c/enterprises/'+eId+'/chat/'+chatId;
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url);
+    xhr.setRequestHeader('authentication-token', Variables.TOKEN);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const data = JSON.parse(xhr.responseText);
+        console.log('Api success', data.response);
+        //response.chat.state 0-unpicked 3-closed
+        resolve(data.response);
+      } else {
+        console.log('Api Status', xhr.statusText);
+        reject(new Error(xhr.statusText));
+      }
+    };
+    xhr.onerror = () => {
+      console.log('Api Error');
+      reject(new Error('Network error'));
+    };
+    xhr.send();
+  });
+}
 export async function getBroadCastList() {
   return new Promise((resolve, reject) => {
     var url =
