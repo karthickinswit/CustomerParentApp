@@ -11,7 +11,7 @@ import {
     PermissionsAndroid,
     Alert
   } from 'react-native';
-  import { ChatScreen } from 'chatcustomersdk/src/utils/globalupdate';
+  import { IndividualChat } from 'chatcustomersdk/src/screens/ChatPage';
   import { NavigationContainer, useNavigation } from '@react-navigation/native';
   import { createNativeStackNavigator } from '@react-navigation/native-stack';
   import AudioRecorderPlayer from 'react-native-audio-recorder-player';
@@ -35,8 +35,8 @@ import {
                 options={{ headerShown: false }}
               /> */}
               <Stack.Screen
-                name="ChatScreen"
-                component={ChatScreen}
+                name="IndividualChat"
+                component={IndividualChat}
                 options={{ headerShown: false }}
               />
              {/* <Stack.Screen
@@ -191,7 +191,7 @@ const onStopPlay = () => {
     baseUrl: 'https://qa.twixor.digital/moc',
   };
   console.log("Handl Login",propDetails);
-navigation.navigate('ChatScreen', {
+navigation.navigate('IndividualChat', {
     userDetails: propDetails,
   });
   };

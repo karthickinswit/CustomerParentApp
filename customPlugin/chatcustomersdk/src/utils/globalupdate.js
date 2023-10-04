@@ -29,6 +29,7 @@ export const ChatScreen = ({ route }) => {
   const [isSocketConnected, setSocketConnection] = useState(false);
   const activeChatList = useRef([]);
   const closedChatList = useRef([]);
+  const chat = useRef({});
   const [users, SetUsers] = useState();
   const newChatCount = useRef(0);
   const invitedChatCount = useRef(0);
@@ -43,13 +44,37 @@ export const ChatScreen = ({ route }) => {
 
   Variables.API_URL = route.params.userDetails.baseUrl;
   Variables.EID = route.params.userDetails.eId;
-  Variables.AgentId = route.params.userDetails.userId;
+  // Variables.AgentId = route.params.userDetails.userId;
   Variables.MobileNum = route.params.userDetails.customerId;
   Variables.cCode = route.params.userDetails.countryCode;
   Variables.ACTIVE_CHATS = '/e/enterprise/chat/summary';
-  Variables.CLOSED_CHATS = '/e/enterprise/chat/history?state=3';
+  // Variables.CLOSED_CHATS = '/e/enterprise/chat/history?state=3';
   // Variables.SUSPENDED_CHATS =
   //   '/e/enterprise/chat/history?state=5&agent=' + Variables.AgentId.toString();
+
+  const customerValidation = async ()=>{
+    const getOldEid = await AsyncStorage.getItem('eId');
+    const getOldCustomerId = await AsyncStorage.getItem('customerId');
+    if(getOldEid && getOldCustomerId){
+      if(route.params.userDetails.eId == parseFloat(getOldEid)){
+       if(route.params.userDetails.customerId == getOldCustomerId){
+        return true;
+       }
+      }
+      else {
+        await AsyncStorage.setItem('eId',route.params.userDetails.eId.toString());
+        await AsyncStorage.setItem('customerId',route.params.userDetails.customerId);
+        await AsyncStorage.setItem('auth-token','');
+        return true;
+      }
+    }
+    else {
+      await AsyncStorage.setItem('eId',route.params.userDetails.eId.toString());
+        await AsyncStorage.setItem('customerId',route.params.userDetails.customerId);
+        await AsyncStorage.setItem('auth-token','');
+        return true;
+    }
+  }
 
   const setToken = async () => {
     
@@ -70,9 +95,10 @@ export const ChatScreen = ({ route }) => {
 
     const checkToken = async () => {
       const storedToken = await AsyncStorage.getItem('auth-token');
-      Variables.TOKEN = storedToken;
+      
       console.log("Token -->",storedToken);
-      if(storedToken){
+      if(storedToken&&storedToken!=''){
+        Variables.TOKEN = storedToken;
         checkTokenApi()
       .then(async data => {
         console.log("Check token api--> ",data);
@@ -83,16 +109,12 @@ export const ChatScreen = ({ route }) => {
             websocket.connect();
             websocket.waitForSocketConnection(() => { });
           }
-
         }
         else if(data==false){
           await setToken();
-
         }
         else {
           console.log("Check Toke False",data);
-         
-
         }
       })
       .catch(error => console.error('Error:', error));
@@ -102,9 +124,14 @@ export const ChatScreen = ({ route }) => {
         setToken();
       }
     };
+
   useEffect(() => {
     setIsTokenValid(false);
-    checkToken();
+    customerValidation(). then( data =>{
+      console.log("customerValidation --> ",data);
+      checkToken();
+    });
+    
   }, []);
 
  
@@ -127,12 +154,17 @@ export const ChatScreen = ({ route }) => {
     };
   }, []);
 
+  useEffect((
+    
+  )=>{
+    console.log("From glovbakl uypdate ",chat)
+  },[chat]);
+
   useEffect(() => {
     socketListener.current = messageService.getMessage().subscribe(data => {
       var obj = JSON.parse(data);
       console.log('socket Instance2', websocket.checkConnection());
       console.log('globListen', obj.action);
-
       if (obj.action === 'onOpen') {
         var content = obj.content[0];
         if (content.response && content.response.customer) {
@@ -148,7 +180,7 @@ export const ChatScreen = ({ route }) => {
         }
        
       } else if (obj.action === 'customerStartChat') {
-        newChatCount.current = newChatCount.current + 1;
+       // newChatCount.current = newChatCount.current + 1;
         setSocketResponse(obj);
       } else if (obj.action === 'agentPickupChat') {
         if (obj.content) {
@@ -194,36 +226,47 @@ export const ChatScreen = ({ route }) => {
     var chatId = res.chat.chatId;
     var messages = res.chat.messages;
 
-    if (activeChatList.current.chats.length > 0) {
-      var currentChat = activeChatList.current.chats.find(response => {
-        return response.chatId == chatId;
-      });
-      console.log('before Updating current', JSON.stringify(currentChat));
-      var concatMesssgaes = [...currentChat.messages, ...messages];
-      var newChatMessages = [
-        ...new Map(concatMesssgaes.map(item => [item.actionId, item])).values(),
-      ];
+    // if (activeChatList.current.chats.length > 0) {
+    //   var currentChat = activeChatList.current.chats.find(response => {
+    //     return response.chatId == chatId;
+    //   });
+      //console.log('before Updating current', JSON.stringify(currentChat));
+      var concatMesssgaes = [];
+      var newChatMessages = [];
+console.log("chat.current ",chat.current);
+      if(chat.current.messages){
+        concatMesssgaes = [...chat.current.messages, ...messages];
+        console.log("concatMessages",concatMesssgaes);
+        newChatMessages = [
+         ...new Map(concatMesssgaes.map(item => [item.actionId, item])).values(),
+       ];
+      }
+      else {
+        concatMesssgaes = [...messages];
+        newChatMessages = [
+         ...new Map(concatMesssgaes.map(item => [item.actionId, item])).values(),
+       ];
+      }
+       
 
-      currentChat['messages'] = newChatMessages;
+      chat.current['messages'] = newChatMessages;
+      
+      // var newChats = activeChatList.current.chats.map(chat =>
+      //   chat.chatId !== chatId ? chat : currentChat,
+      // );
 
-      var newChats = activeChatList.current.chats.map(chat =>
-        chat.chatId !== chatId ? chat : currentChat,
-      );
-
-      activeChatList.current.chats = newChats;
+     // activeChatList.current.chats = newChats;
       console.log(
         'After Updating current',
-        JSON.stringify(activeChatList.current),
+        JSON.stringify(chat.current.messages),
       );
-    } else {
-      console.log('No Active Chats');
-    }
+    
   }
 
   return isSocketConnected ? (
     <GlobalContext.Provider
       value={{
-       
+        chat
       }}>
       <NavigationContainer independent={true}>
         <Stack.Navigator>
@@ -231,7 +274,7 @@ export const ChatScreen = ({ route }) => {
             {props => <ChatListPage {...props} />}
           </Stack.Screen> */}
           <Stack.Screen name="IndividualChat" options={{ headerShown: false }}>
-            {props => <IndividualChat/>}
+            {props => <IndividualChat {...props} />}
           </Stack.Screen>
           {/* <Stack.Screen name="Conversation" options={{ headerShown: false }}>
             {props => (

@@ -1,4 +1,4 @@
-import React, { useState ,useEffect} from 'react';
+import React, { useState ,useEffect,useContext} from 'react';
 import {
   View,
   Text,
@@ -33,11 +33,13 @@ let { height } = Dimensions.get('window');
 let flatList = React.useRef(null);
 
 const IndividualChat =  () => {
-  const value = React.useContext(GlobalContext);
+  const value = useContext(GlobalContext);
   
   const [chatId,setChatId] = useState('');
   const [isValidchat,setIsValidChat]=useState(false) ;
-const[chat,setChat] = useState({})
+  const[chat,setChat] = useState(value.chat)
+console.log("Indivdiual Chat--> ",value)
+//let chat = value.chat.current;
   //let chatId = route.route.params.chatId;
   // let chat = value.activeChatList.current.chats.find(response => {
   //   return response.chatId == chatId;
@@ -48,13 +50,19 @@ useEffect( ()=>{
   chatIdValidation();
 },[])
 
+useEffect( ()=>{
+  setChat(value.chat);
+  console.log("Afet Chat -->",chat)
+},[value.chat])
+
 
 newChatCreation=()=>{
   chatCreationApi(Variables.EID)
   .then(async data => {
     console.log('Chat Creation data-->', data);
     if(data.status){
-      let newChatId = data.response.chatId
+      let newChatId = data.response.chatId ;
+
       setChatId(newChatId);
       await AsyncStorage.setItem('chatId',newChatId);
       await chatIdValidation();
@@ -78,7 +86,9 @@ const chatIdValidation=async ()=>{
     let res= data.chat;
     if(res.state!=3){
       setIsValidChat(true);
-      setChat(res);
+    //  setChat(res);
+  setChat(res);
+    console.log("value.chat.current ",value.chat )
       console.log("chat res--> ",res);
     }
     else {
@@ -361,6 +371,23 @@ console.log("Chat header",chat);
 
     const handleSendMessage = () => {
       console.log(message);
+      
+    const sendObject1=   {
+      "eId": chat.eId,
+      "action": "customerStartChat",
+      "message": message,
+      "chatId": chat.chatId,
+      "contentType": "TEXT",
+      "service": ""
+  } 
+    const sendObject2=   {
+      "eId": chat.eId,
+      "action": "customerReplyChat",
+      "message": message,
+      "chatId": chat.chatId,
+      "contentType": "TEXT",
+      "service": ""
+  } 
       const sendObject = {
         action: 'agentReplyChat',
         eId: chat.eId,
@@ -370,8 +397,8 @@ console.log("Chat header",chat);
         attachment: {},
         pickup: false,
       };
-      console.log('send Object', sendObject);
-      messageService.sendMessage(sendObject);
+      console.log('send Object', chat['messages']?sendObject2:sendObject1);
+      messageService.sendMessage(chat['messages']?sendObject2:sendObject1);
       setMessage('');
     };
 

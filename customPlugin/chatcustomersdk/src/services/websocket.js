@@ -1,31 +1,34 @@
 import {Subject} from 'rxjs';
-
-// import GlobalConfig from './constants/constants';
-// import userInfo from './constants/constants';
+import {share} from 'rxjs/operators'
 import Variables from '../utils/variables';
 
 export let subUser = new Subject();
 
 export let messageService = {
+  status : false,
   sendMessage: message => {
     WebSocketClient.getInstance().sendingMessage(message);
   },
   clearMessages: () => subUser.next(),
-  getMessage: () => subUser.asObservable(),
+  getMessage: () => subUser.asObservable().pipe(share()),
 };
 
 class WebSocketClient {
   static instance = null;
   isConnected = false;
   callbacks = {};
+  messageHandlers = [];
 
   static getInstance() {
+    //WebSocketClient.instance = null
     if (!WebSocketClient.instance) {
       WebSocketClient.instance = new WebSocketClient();
     }
     return WebSocketClient.instance;
   }
-
+// closeSocket(){
+//   WebSocketClient.instance = null;
+// }
   constructor() {
     this.socketRef = null;
   }
@@ -40,6 +43,7 @@ class WebSocketClient {
     let url = Variables.API_URL.replace('http', 'ws') + '/actions';
     // 'https://qa.twixor.digital/moc'.replace('http', 'ws') + '/actions';
     console.log(url);
+    this.socketRef = null;
     this.socketRef = new WebSocket(url, null, {
       headers,
     });
@@ -52,26 +56,46 @@ class WebSocketClient {
 
     this.socketRef.onmessage = e => {
       this.isConnected=true;
+      console.log("From websocket",this.socketRef);
       subUser.next(e.data);
     };
 
     this.socketRef.onerror = e => {
       console.log(e.message);
-      // this.socketRef.isConnected = false;
+       this.socketRef.isConnected = false;
       this.isConnected=false;
     };
 
     this.socketRef.onclose = e => {
       this.isConnected=false;
+      this.socketRef.isConnected = false;
       console.log(
         "WebSocket closed let's reopen--> " + Variables.TOKEN,
         JSON.stringify(e),
       );
-      this.connect();
+      console.log(e);
+      if(e.code!=1000){
+        this.connect();
+      }
+      
     };
   };
   checkState(){
     return this.socketRef.readyState;
+  }
+  closeSocket() {
+    // Close the WebSocket connection if it's open
+    if (this.socketRef && this.socketRef.readyState === WebSocket.OPEN) {
+      this.socketRef.close();
+    }
+   // this.socketRef.close(100,"jkdskdjsk");
+
+    // Set the instance to null
+    WebSocketClient.instance = null;
+    //subUser = null;
+  }
+  closeConnection(){
+    this.instance = null;
   }
   checkConnection(){
    return this.socketRef.isConnected;

@@ -96,7 +96,7 @@ export async function checkTokenApi() {
     xhr.setRequestHeader('authentication-token', Variables.TOKEN);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onload = () => {
-      console.log("chektoken api res--> ",xhr);
+      //console.log("chektoken api res--> ",xhr);
       if (xhr.status === 200) {
         // const data = JSON.parse(xhr.responseText);
         // console.log('Api success-->', JSON.stringify(data));
