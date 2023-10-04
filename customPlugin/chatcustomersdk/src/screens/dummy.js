@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -18,98 +18,43 @@ import {
   PermissionsAndroid,
   ImageBackground,
   ToastAndroid,
-  FlatList
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { messageService } from '../services/websocket';
-import { GlobalContext } from '../utils/globalupdate';
-import { timeConversion } from '../utils/utilities';
-import { MenuProvider } from 'react-native-popup-menu';
-import { chatCreationApi, getChatInfo } from '../services/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Variables from '../utils/variables';
-// import DateTimePicker from '@react-native-community/datetimepicker';
-// import ImagePicker from 'react-native-image-picker';
+// import { useNavigation } from '@react-navigation/native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import ImagePicker from 'react-native-image-picker';
 const { height } = Dimensions.get('window');
 
-let flatList = React.useRef(null);
+let data = [
+  {
+    id: 1,
+    name: 'Twixor Chat Bot',
+    avatar: 'https://img.freepik.com/free-photo/portrait-wise-person_52683-100915.jpg?t=st=1696402043~exp=1696402643~hmac=c6beb01eec2fac15ffdd7ec6cf99f0ef1898d4157ec1d3813cf7a6235557ff69',
+    lastMessage: 'Hi, Good Morning',
+    time: 'Sep 12th 2023 10:30 AM',
+    unreadCount: 3,
+    status: 'online',
+    messages: [
+      { id: 1, sender: 'john', text: 'Hi there', timestamp: 'Sep 12th 2023 10:00 AM' },
+      { id: 2, sender: 'me', text: 'Hi, Good Morning', timestamp: 'Sep 12th 2023 11:00 AM' },
+      { id: 3, sender: 'john', text: 'How are your relatives?', timestamp: 'Sep 12th 2023 11:30 AM' },
+      { id: 4, sender: 'me', text: 'They are doing well, thanks for asking!', timestamp: 'Sep 12th 2023 11:45 AM' },
+      { id: 5, sender: 'john', text: 'Thats great to hear. By the way, have you heard about the testing messages issue?', timestamp: 'Sep 12th 2023 12:00 PM' },
+      { id: 6, sender: 'me', text: 'Yes, Ive heard about it. It happened due to a server glitch.', timestamp: 'Sep 12th 2023 12:15 PM' },
+      { id: 7, sender: 'john', text: 'Do you know when it will be fixed?', timestamp: 'Sep 12th 2023 12:30 PM' },
+      { id: 8, sender: 'me', text: 'The development team is actively working on it. Hopefully, it will be resolved soon.', timestamp: 'Sep 12th 2023 12:45 PM' },
+      { id: 9, sender: 'john', text: 'Alright, thanks for the update.', timestamp: ' Sep 12th 2023 1:00 PM' },
+    ],
+  },
+];
 
-const IndividualChat = () => {
-  const value = useContext(GlobalContext);
-
-  const [chatId, setChatId] = useState('');
-  const [isValidchat, setIsValidChat] = useState(false);
-  const [chat, setChat] = useState(value.chat)
-  console.log("Indivdiual Chat--> ", value)
-  //let chat = value.chat.current;
-  //let chatId = route.route.params.chatId;
-  // let chat = value.activeChatList.current.chats.find(response => {
-  //   return response.chatId == chatId;
-  // });
+function IndividualChat() {
+  const [chatData, setChatData] = React.useState(data[0]);
+  const [refreshing, setRefreshing] = React.useState(false);
   const [imageSource, setImageSource] = React.useState(null);
   const [modalVisible, setModalVisible] = React.useState(false);
-  const [refreshing, setRefreshing] = React.useState(false);
   const [fromDate, setFromDate] = React.useState(new Date());
   const [toDate, setToDate] = React.useState(new Date());
   const [showPicker, setShowPicker] = React.useState(false);
-  useEffect(() => {
-    chatIdValidation();
-  }, [])
-
-  useEffect(() => {
-    setChat(value.chat);
-    console.log("Afet Chat -->", chat)
-  }, [value.chat])
-
-
-  newChatCreation = () => {
-    chatCreationApi(Variables.EID)
-      .then(async data => {
-        console.log('Chat Creation data-->', data);
-        if (data.status) {
-          let newChatId = data.response.chatId;
-
-          setChatId(newChatId);
-          await AsyncStorage.setItem('chatId', newChatId);
-          await chatIdValidation();
-        }
-        else { console.log(data); }
-
-      })
-      .catch(error => console.error('Error:', error));
-  }
-
-  const chatIdValidation = async () => {
-    let storedChatId = await AsyncStorage.getItem('chatId');
-    if (!storedChatId) {
-      await newChatCreation();
-    }
-    else {
-      getChatInfo(Variables.EID, storedChatId)
-        .then(async data => {
-          console.log('Chat checking data-->', data);
-          if (data.chat) {
-            let res = data.chat;
-            if (res.state != 3) {
-              setIsValidChat(true);
-              //  setChat(res);
-              setChat(res);
-              console.log("value.chat.current ", value.chat)
-              console.log("chat res--> ", res);
-            }
-            else {
-              setIsValidChat(false);
-              await newChatCreation();
-
-            }
-
-          }
-          else { console.log(data); }
-
-        })
-        .catch(error => console.error('Error:', error));
-    }
-  }
 
   const launchImagePicker = () => {
     let options = {
@@ -313,196 +258,102 @@ const IndividualChat = () => {
   };
 
   const ChatHeader = () => {
-    const navigation = useNavigation();
-    console.log("Chat header", chat);
-    useEffect(() => {
-      console.log("Chat header", chat);
-    }, [isValidchat]);
+    // const navigation = useNavigation();
     return (
-      <>
-        <SafeAreaView style={{ backgroundColor: 'white' }}>
-          <View style={styles.container}>
-            {/* <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => {
-                navigation.goBack();
-              }}>
-              <Image
-                source={require('../../assets/chevron-left-solid.png')}
-                style={styles.logo}
-              />
-            </TouchableOpacity> */}
-            <View style={styles.leftContainer}>
-              {chat.customerIconUrl ? (
-                <Image
-                  source={{ uri: chat.customerIconUrl }}
-                  style={styles.avatar}
-                />
-              ) : (
-                <Image
-                  source={require('../../assets/boy_dummy.png')}
-                  style={styles.avatar}
-                />
-              )}
-              <View style={styles.textContainer}>
-                <Text style={styles.title}>{chat.customerName}</Text>
-                {/* <Text style={styles.subtitle}>Online</Text> */}
-              </View>
+      <SafeAreaView style={{ backgroundColor: 'white' }}>
+        <View style={styles.container}>
+          {/* <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => {
+              navigation.navigate('ChatScreen');
+            }}>
+            <Image
+              source={require('../../assets/chevron-left-solid.png')}
+              style={styles.logo}
+            />
+          </TouchableOpacity> */}
+          <View style={styles.leftContainer}>
+            <Image source={require('../../assets/potratit.png')} style={styles.avatar} />
+            <View style={styles.textContainer}>
+              <Text style={styles.title}>{chatData.name}</Text>
+              {/* <Text style={styles.subtitle}>{chatData.status}</Text> */}
             </View>
-            {/* <View style={styles.rightContainer}>
-              <TouchableOpacity
-                onPress={() => {
-                  closeChat(chat.chatId).then(() => {
-                    navigation.goBack();
-                  });
-                }}>
-                <View style={[styles.buttonCnf]}>
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      color: 'white',
-                      alignItems: 'center',
-                    }}>
-                    Close Chat
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View> */}
           </View>
-        </SafeAreaView>
-      </>
+          {/* <View style={styles.rightContainer}>
+            <TouchableOpacity onPress={triggerMenu}>
+              <Image
+                source={require('../../assets/inside_menu_64.png')}
+                style={styles.icon}
+              />
+            </TouchableOpacity>
+          </View> */}
+        </View>
+      </SafeAreaView>
     );
-
   };
 
   const ChatBody = () => {
-
     const scrollViewRef = React.useRef();
 
     React.useEffect(() => {
       if (scrollViewRef.current) {
         scrollViewRef.current.scrollToEnd({ animated: true });
       }
-    }, [chat.messages]);
+    }, [chatData.messages]);
 
-    let renderMessage = ({ item, index }) => {
-      return (
-        <View style={{ flex: 1 }}>
-          <ScrollView ref={scrollViewRef}
-            onContentSizeChange={() => {
-              scrollViewRef.current.scrollToEnd({ animated: true });
-            }}
-            contentContainerStyle={styles.contentContainer}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshPage} />}>
-            {item.actionType == 0 || item.actionType == 1 ? (
-              <View style={styles.messageSent}>
-                <Text style={styles.messageText} key={index}>
-                  {item.message}
-                </Text>
-                <Text style={styles.timestampText}>
-                  {timeConversion(item.actedOn)}
-                </Text>
-              </View>
-            ) : item.actionType == 2 ? (
-              <View style={styles.messageHeader}>
-                <Text style={styles.messageText} key={index}>
-                  {item.messager ? 'You' : item.message} You joined chat
-                </Text>
-              </View>
-            ) : item.actionType == 4 ? (
-              <View style={styles.messageHeader}>
-                <Text style={styles.messageText} key={index}>
-                  {item.message ? 'You' : item.message} transferred chat To You
-                </Text>
-              </View>
-            ) : item.actionType == 8 ? (
-              <View style={styles.messageHeader}>
-                <Text style={styles.messageText} key={index}>
-                  {item.message ? 'You' : item.message} left this chat
-                </Text>
-              </View>
-            ) : item.actionType == 9 ? (
-              <View style={styles.messageHeader}>
-                <Text style={styles.messageText} key={index}>
-                  {item.message ? 'You' : item.message} You left this chat
-                </Text>
-              </View>
-            ) : item.actionType == 3 ? (
-              <View style={styles.messageReceived}>
-                <Text style={styles.messageText} key={index}>
-                  {item.message}
-                </Text>
-                <Text style={styles.timestampText}>
-                  {timeConversion(item.actedOn)}
-                </Text>
-              </View>
-            ) : (
-              <View></View>
-            )}
-          </ScrollView>
-        </View>
-      );
+    const renderMessages = () => {
+      return chatData.messages.map(item => (
+        <ScrollView
+          key={item.id.toString()}
+          style={item.sender === 'me' ? styles.messageSent : styles.messageReceived}>
+          <Text style={item.sender === 'me' ? styles.messageText : styles.messageText1}>{item.text.trim()}</Text>
+          <Text style={item.sender === 'me' ? styles.timestampText : styles.timestampText1}>{item.timestamp}</Text>
+          {item.imageSource ? (
+            <Image source={{ uri: item.imageSource }} style={{ width: 150, height: 150 }} />
+          ) : null}
+        </ScrollView>
+      ));
     };
 
     return (
       <ImageBackground
         source={require('../../assets/twixor_chat_bg.png')}
         style={{ flex: 1 }}>
-        <FlatList
-          data={chat.messages}
-          key={chat.messages.id.toString()}
-          renderItem={chat.messages.length > 0 ? renderMessage() : (
+        <ScrollView
+          ref={scrollViewRef}
+          onContentSizeChange={() => {
+            scrollViewRef.current.scrollToEnd({ animated: true });
+          }}
+          contentContainerStyle={styles.contentContainer}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshPage} />}>
+          {chatData.messages.length > 0 ? renderMessages() : (
             <View style={[styles.loadercontainer, styles.loaderhorizontal]}>
               <ActivityIndicator size="large" color="#217eac" text="Loading Data" />
             </View>
           )}
-          keyExtractor={item => item.actionId.toString()}
-          contentContainerStyle={styles.contentContainer}
-          legacyImplementation={true}
-          extraData={true}
-          ref={flatList}
-          onContentSizeChange={() => flatList.current.scrollToEnd()}
-        />
+        </ScrollView>
       </ImageBackground>
     );
   };
 
   const ChatFooter = () => {
-
     const [message, setMessage] = React.useState('');
     const [recordAudio, setRecordAudio] = React.useState(false);
     const [switchRecord, setswitchRecord] = React.useState(true);
 
-    const handleSendMessage = () => {
-      console.log(message);
-
-      const sendObject1 = {
-        "eId": chat.eId,
-        "action": "customerStartChat",
-        "message": message,
-        "chatId": chat.chatId,
-        "contentType": "TEXT",
-        "service": ""
-      }
-      const sendObject2 = {
-        "eId": chat.eId,
-        "action": "customerReplyChat",
-        "message": message,
-        "chatId": chat.chatId,
-        "contentType": "TEXT",
-        "service": ""
-      }
-      const sendObject = {
-        action: 'agentReplyChat',
-        eId: chat.eId,
-        message: message,
-        contentType: 'TEXT',
-        chatId: chat.chatId,
-        attachment: {},
-        pickup: false,
+    let handleSendMessage = () => {
+      const newMessage = {
+        id: chatData.messages.length + 1,
+        sender: 'me',
+        text: message,
+        timestamp: '9:00 AM',
+        imageSource: imageSource,
       };
-      console.log('send Object', chat['messages'] ? sendObject2 : sendObject1);
-      messageService.sendMessage(chat['messages'] ? sendObject2 : sendObject1);
+      const updatedChatData = {
+        ...chatData,
+        messages: [...chatData.messages, newMessage],
+      };
+      setChatData(updatedChatData);
       setMessage('');
       setImageSource(null);
     };
@@ -585,63 +436,56 @@ const IndividualChat = () => {
     };
 
     return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <SafeAreaView style={{ backgroundColor: 'white' }}>
-            <View style={styles.footercontainer}>
-              <>
-                {switchRecord ?
-                  <>
-                    <View >
-                      <TouchableOpacity style={styles.attachmentButton} onPress={() => setModalVisible(true)}>
-                        <Image source={require('../../assets/attach_file.png')} style={styles.attachmentIcon} />
-                      </TouchableOpacity>
-                    </View>
-                    <TextInput
-                      style={styles.input}
-                      value={message}
-                      onChangeText={setMessage}
-                      placeholder="Type a message"
-                      multiline
-                    /></> : <Text style={styles.recordingOnProgress}>Recording Initiated, Do a Long Press to Stop Audio.....</Text>}
-              </>
-              {message.trim().length > 0 ? (
-                <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
-                  <Image source={require('../../assets/send_128.png')} style={styles.sendIcon} />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity onPress={recordAlert} onLongPress={startAudio}>
-                  <Image
-                    source={require('../../assets/mic.png')}
-                    style={{ tintColor: recordAudio ? 'red' : '#406c74', ...styles.attachmentButton1 }}
-                  />
-                </TouchableOpacity>
-              )}
-            </View>
-            <BottomModalForIndividualChat />
-          </SafeAreaView>
-        </TouchableWithoutFeedback>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <SafeAreaView style={{ backgroundColor: 'white' }}>
+          <View style={styles.footercontainer}>
+            <>
+              {switchRecord ?
+                <>
+                  <View >
+                    <TouchableOpacity style={styles.attachmentButton} onPress={() => setModalVisible(true)}>
+                      <Image source={require('../../assets/attach_file.png')} style={styles.attachmentIcon} />
+                    </TouchableOpacity>
+                  </View>
+                  <TextInput
+                    style={styles.input}
+                    value={message}
+                    onChangeText={setMessage}
+                    placeholder="Type a message"
+                    multiline
+                  /></> : <Text style={styles.recordingOnProgress}>Recording Initiated, Do a Long Press to Stop Audio.....</Text>}
+            </>
+            {message.trim().length > 0 ? (
+              <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
+                <Image source={require('../../assets/send_128.png')} style={styles.sendIcon} />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={recordAlert} onLongPress={startAudio}>
+                <Image
+                  source={require('../../assets/mic.png')}
+                  style={{ tintColor: recordAudio ? 'red' : '#406c74', ...styles.attachmentButton1 }}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+          <BottomModalForIndividualChat />
+        </SafeAreaView>
       </KeyboardAvoidingView>
     );
   };
 
   return (
-    isValidchat ? (
-      <MenuProvider>
-        <ChatHeader />
-        <ChatBody />
-        <ChatFooter />
-      </MenuProvider>
-    ) : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator
-        hidesWhenStopped={isValidchat}
-        size="large"
-        color="#217eac"></ActivityIndicator>
-      <Text style={{ marginTop: 10 }}>Loading Chat</Text>
-    </View>
+    <>
+      <ChatHeader />
+      {/* <View style={styles.alertcontainer}>
+        <Text style={styles.alerttext}>You Started a Chat</Text>
+      </View> */}
+      <DateUI />
+      <ChatBody />
+      <ChatFooter />
+    </>
   );
-};
+}
 
 let styles = StyleSheet.create({
   container: {
@@ -685,7 +529,7 @@ let styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     color: 'white',
-    fontFamily: 'inherit'
+    fontFamily : 'inherit'
   },
   menuButton: {
     padding: 8,
@@ -703,7 +547,7 @@ let styles = StyleSheet.create({
     padding: 8,
     marginBottom: 8,
     borderTopRightRadius: 0,
-    fontFamily: 'inherit'
+    fontFamily : 'inherit'
   },
   messageReceived: {
     backgroundColor: 'white',
@@ -717,26 +561,26 @@ let styles = StyleSheet.create({
   messageText: {
     fontSize: 14,
     color: 'black',
-    fontFamily: 'inherit'
+    fontFamily : 'inherit'
   },
   messageText1: {
     fontSize: 14,
     color: 'black',
-    fontFamily: 'inherit'
+    fontFamily : 'inherit'
   },
   timestampText: {
     fontSize: 10,
     color: 'gray',
     marginTop: 4,
     alignSelf: 'flex-end',
-    fontFamily: 'inherit'
+    fontFamily : 'inherit'
   },
   timestampText1: {
     fontSize: 10,
     color: 'gray',
     marginTop: 4,
     alignSelf: 'flex-end',
-    fontFamily: 'inherit'
+    fontFamily : 'inherit'
   },
   footercontainer: {
     position: 'absolute',
@@ -763,7 +607,7 @@ let styles = StyleSheet.create({
     paddingVertical: 8,
     maxHeight: 150,
     marginRight: '5%',
-    fontFamily: 'inherit'
+    fontFamily : 'inherit'
   },
   sendIcon: {
     width: 24,
@@ -857,7 +701,7 @@ let styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 14,
-    marginTop: 7
+    marginTop : 7
   },
   imageIcon: {
     width: 40,
@@ -873,7 +717,7 @@ let styles = StyleSheet.create({
     paddingVertical: 12,
     maxHeight: 150,
     marginRight: '5%',
-    color: 'black'
+    color: 'black' 
   },
   alertcontainer: {
     backgroundColor: 'white',
@@ -884,8 +728,8 @@ let styles = StyleSheet.create({
     width: '45%',
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginTop: 10,
-    marginBottom: 10
+    marginTop : 10,
+    marginBottom : 10
   },
   alerttext: {
     color: 'gray',

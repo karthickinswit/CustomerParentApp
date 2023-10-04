@@ -1,7 +1,5 @@
 
 import React, {
-  createContext,
-  useContext,
   useEffect,
   useState,
   useRef
@@ -24,7 +22,8 @@ import {
   Dimensions,
   PermissionsAndroid,
   ImageBackground,
-  ToastAndroid, FlatList, BackHandler
+  ToastAndroid,
+  BackHandler
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 // import DateTimePicker from '@react-native-community/datetimepicker';
@@ -38,26 +37,26 @@ import websocket from '../services/websocket';
 import { registerApi, checkTokenApi, chatCreationApi, getChatInfo } from '../services/api';
 
 const { height } = Dimensions.get('window');
-let flatList = React.useRef(null);
+
 let data = [
   {
     id: 1,
-    name: 'Customer Support Team',
-    avatar: 'https://img.freepik.com/free-photo/grandma-taking-care-plants-garden_23-2149518819.jpg?w=900&t=st=1695981111~exp=1695981711~hmac=405e653d42c5005c7c256588fca3e7d8671f1b989ca1124b78c1c9a29f02726f',
+    name: 'Twixor Chat Bot',
+    avatar: 'https://img.freepik.com/free-photo/portrait-wise-person_52683-100915.jpg?t=st=1696402043~exp=1696402643~hmac=c6beb01eec2fac15ffdd7ec6cf99f0ef1898d4157ec1d3813cf7a6235557ff69',
     lastMessage: 'Hi, Good Morning',
-    time: '10:30 AM',
+    time: 'Sep 12th 2023 10:30 AM',
     unreadCount: 3,
     status: 'online',
     messages: [
-      { id: 1, sender: 'john', text: 'Hi there', timestamp: '10:00 AM' },
-      { id: 2, sender: 'me', text: 'Hi, Good Morning', timestamp: '11:00 AM' },
-      { id: 3, sender: 'john', text: 'How are your relatives?', timestamp: '11:30 AM' },
-      { id: 4, sender: 'me', text: 'They are doing well, thanks for asking!', timestamp: '11:45 AM' },
-      { id: 5, sender: 'john', text: 'Thats great to hear. By the way, have you heard about the testing messages issue?', timestamp: '12:00 PM' },
-      { id: 6, sender: 'me', text: 'Yes, Ive heard about it. It happened due to a server glitch.', timestamp: '12:15 PM' },
-      { id: 7, sender: 'john', text: 'Do you know when it will be fixed?', timestamp: '12:30 PM' },
-      { id: 8, sender: 'me', text: 'The development team is actively working on it. Hopefully, it will be resolved soon.', timestamp: '12:45 PM' },
-      { id: 9, sender: 'john', text: 'Alright, thanks for the update.', timestamp: '1:00 PM' },
+      { id: 1, sender: 'john', text: 'Hi there', timestamp: 'Sep 12th 2023 10:00 AM' },
+      { id: 2, sender: 'me', text: 'Hi, Good Morning', timestamp: 'Sep 12th 2023 11:00 AM' },
+      { id: 3, sender: 'john', text: 'How are your relatives?', timestamp: 'Sep 12th 2023 11:30 AM' },
+      { id: 4, sender: 'me', text: 'They are doing well, thanks for asking!', timestamp: 'Sep 12th 2023 11:45 AM' },
+      { id: 5, sender: 'john', text: 'Thats great to hear. By the way, have you heard about the testing messages issue?', timestamp: 'Sep 12th 2023 12:00 PM' },
+      { id: 6, sender: 'me', text: 'Yes, Ive heard about it. It happened due to a server glitch.', timestamp: 'Sep 12th 2023 12:15 PM' },
+      { id: 7, sender: 'john', text: 'Do you know when it will be fixed?', timestamp: 'Sep 12th 2023 12:30 PM' },
+      { id: 8, sender: 'me', text: 'The development team is actively working on it. Hopefully, it will be resolved soon.', timestamp: 'Sep 12th 2023 12:45 PM' },
+      { id: 9, sender: 'john', text: 'Alright, thanks for the update.', timestamp: ' Sep 12th 2023 1:00 PM' },
     ],
   },
 ];
@@ -286,7 +285,7 @@ export const IndividualChat = ({ route }) => {
       socketListener.current.unsubscribe();
       setSocketConnection(false);
     };
-  }, [chat,isValidchat]);
+  }, [chat, isValidchat]);
   useEffect(() => {
     // setIsTokenValid(false);
 
@@ -328,7 +327,7 @@ export const IndividualChat = ({ route }) => {
             let res = data.chat;
             let users = data.users;
             if (res.state != 3) {
-              
+
               //  setChat(res);
               setChat(res);
               setIsValidChat(true);
@@ -364,15 +363,26 @@ export const IndividualChat = ({ route }) => {
 
     ImagePicker.launchImageLibrary(options, response => {
       if (response.didCancel) {
-        console.log('User cancelled photo picker');
-        Alert.alert('You did not select any image');
+        ToastAndroid.showWithGravityAndOffset(
+          'You Did Not Select Any Image / Documents',
+          ToastAndroid.SHORT,
+          ToastAndroid.TOP,
+          25,
+          50,
+        )
       } else if (response.error) {
         console.log('ImagePicker Error: ', response.error);
+        ToastAndroid.showWithGravityAndOffset(
+          'Cannot Browse the Gallery',
+          ToastAndroid.SHORT,
+          ToastAndroid.TOP,
+          25,
+          50,
+        )
       } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
       } else {
         let source = { uri: response.uri };
-        // ADD THIS
         setImageSource(source.uri);
       }
     });
@@ -557,7 +567,7 @@ export const IndividualChat = ({ route }) => {
             />
           </TouchableOpacity> */}
           <View style={styles.leftContainer}>
-            {chat.customerIconUrl ? (
+            {!chat.customerIconUrl || chat.customerIconUrl == "" ? (
               <Image source={{ uri: chat.customerIconUrl }} style={styles.avatar} />
             ) : (
               <Image
@@ -570,14 +580,14 @@ export const IndividualChat = ({ route }) => {
               {/* <Text style={styles.subtitle}>{c.status}</Text> */}
             </View>
           </View>
-          <View style={styles.rightContainer}>
+          {/* <View style={styles.rightContainer}>
             <TouchableOpacity onPress={triggerMenu}>
               <Image
                 source={require('../../assets/inside_menu_64.png')}
                 style={styles.icon}
               />
             </TouchableOpacity>
-          </View>
+          </View> */}
         </View>
       </SafeAreaView>
     );
@@ -621,13 +631,22 @@ export const IndividualChat = ({ route }) => {
     //     }
     //   />
     // );
+
+    const scrollViewRef = React.useRef();
+
+    React.useEffect(() => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
+    }, [chat.messages]);
+
     const renderMessages = () => {
       console.log("Messages-->", chat.messages)
       return chat.messages ? chat.messages.map((item, index) => (
         <ScrollView ref={scrollViewRef}
-          onContentSizeChange={scrollToBottom}>
+          key={item.id}
+        >
           {item.actionType == 0 ? (
-
             <View style={styles.alertcontainer} key={item.actionId}>
               <Text style={styles.alerttext}>You Started a Chat</Text>
             </View>
@@ -676,7 +695,7 @@ export const IndividualChat = ({ route }) => {
               </View>
             ) : item.actionType == 8 ? (
               <View style={styles.alertcontainer} key={item.actionId}>
-                 <Text style={styles.alerttext}>
+                <Text style={styles.alerttext}>
                   {users.filter((user) => user.id == item.actionBy)[0].name} Closed this chat
                 </Text>
               </View>
@@ -719,6 +738,10 @@ export const IndividualChat = ({ route }) => {
         source={require('../../assets/twixor_chat_bg.png')} // Replace with your actual image path
         style={{ flex: 1 }}>
         <ScrollView
+          ref={scrollViewRef}
+          onContentSizeChange={() => {
+            scrollViewRef.current.scrollToEnd({ animated: true });
+          }}
           contentContainerStyle={styles.contentContainer}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshPage} />}>
           {chatData.messages.length > 0 ? renderMessages() : (
@@ -727,16 +750,6 @@ export const IndividualChat = ({ route }) => {
             </View>
           )}
         </ScrollView>
-        {/* <FlatList
-          data={chat.messages}
-          renderItem={renderMessages}
-          keyExtractor={item => item.actionId.toString()}
-          contentContainerStyle={styles.contentContainer}
-          legacyImplementation={true}
-          extraData={true}
-          ref={flatList}
-          onContentSizeChange={() => flatList.current.scrollToEnd()}
-        /> */}
       </ImageBackground>
     );
   };
@@ -744,6 +757,7 @@ export const IndividualChat = ({ route }) => {
   const ChatFooter = () => {
     const [message, setMessage] = React.useState('');
     const [recordAudio, setRecordAudio] = React.useState(false);
+    const [switchRecord, setswitchRecord] = React.useState(true);
 
     const handleSendMessage = () => {
       console.log(message);
@@ -776,6 +790,7 @@ export const IndividualChat = ({ route }) => {
       console.log('send Object', chat['messages'] ? sendObject2 : sendObject1);
       messageService.sendMessage(chat['messages'] ? sendObject2 : sendObject1);
       setMessage('');
+      setImageSource(null);
     };
 
     const BottomModalForIndividualChat = () => {
@@ -787,42 +802,46 @@ export const IndividualChat = ({ route }) => {
               transparent={true}
               visible={modalVisible}
               onRequestClose={() => {
-                Alert.alert('Modal has been closed.');
                 setModalVisible(!modalVisible);
               }}>
-              <View style={[styles.centeredView, { height: height / 2 }]}>
-                <View style={styles.modalView}>
-                  <TouchableOpacity
-                    style={styles.submitButton}
-                    onPress={requestGalleryPermission}>
-                    <Image
-                      source={require('../../assets/gallery.png')}
-                      style={styles.imageIcon}
-                    />
-                    <Text style={styles.submitButtonText}>Gallery</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.submitButton}
-                    onPress={requestCameraPermission}>
-                    <Image
-                      source={require('../../assets/photo_camera.png')}
-                      style={styles.imageIcon}
-                    />
-                    <Text style={styles.submitButtonText}>
-                      Camera
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.submitButton}
-                    onPress={() => setModalVisible(!modalVisible)}>
-                    <Image
-                      source={require('../../assets/folder_open.png')}
-                      style={styles.imageIcon}
-                    />
-                    <Text style={styles.submitButtonText}>Documents</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+              <TouchableOpacity
+                style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}
+                onPress={() => {
+                  setModalVisible(!modalVisible);
+                }}>
+                <View style={[styles.centeredView, { height: height / 2 }]}>
+                  <View style={styles.modalView}>
+                    <TouchableOpacity
+                      style={styles.submitButton}
+                      onPress={requestGalleryPermission}>
+                      <Image
+                        source={require('../../assets/gallery.png')}
+                        style={styles.imageIcon}
+                      />
+                      <Text style={styles.submitButtonText}>Gallery</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.submitButton}
+                      onPress={requestCameraPermission}>
+                      <Image
+                        source={require('../../assets/camera.png')}
+                        style={styles.imageIcon}
+                      />
+                      <Text style={styles.submitButtonText}>
+                        Camera
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.submitButton}
+                      onPress={requestGalleryPermission}>
+                      <Image
+                        source={require('../../assets/documents.png')}
+                        style={styles.imageIcon}
+                      />
+                      <Text style={styles.submitButtonText}>Documents</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View></TouchableOpacity>
             </Modal>
           </View>
         </>
@@ -837,18 +856,13 @@ export const IndividualChat = ({ route }) => {
         ToastAndroid.TOP,
         25,
         50,
-      ) : ToastAndroid.showWithGravityAndOffset(
-        'Recording Started. Speak Something',
-        ToastAndroid.SHORT,
-        ToastAndroid.TOP,
-        25,
-        50,
-      );
+      ) : null;
+      setswitchRecord(!switchRecord)
     };
 
     const recordAlert = () => {
       ToastAndroid.showWithGravityAndOffset(
-        'Do a Long Press to Record an Audio',
+        'Do a Long Press to Record / Stop an Audio',
         ToastAndroid.LONG,
         ToastAndroid.BOTTOM,
         25,
@@ -860,40 +874,34 @@ export const IndividualChat = ({ route }) => {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <SafeAreaView style={{ backgroundColor: 'white' }}>
           <View style={styles.footercontainer}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <TouchableOpacity style={styles.attachmentButton} onPress={() => setModalVisible(true)}>
-                <Image source={require('../../assets/add_128.png')} style={styles.attachmentIcon} />
-              </TouchableOpacity>
-              {message.trim().length > 0 ? null : (
+            <>
+              {switchRecord ?
                 <>
-                  <View>
-                    <TouchableOpacity onPress={recordAlert} onLongPress={startAudio}>
-                      <Image
-                        source={require('../../assets/mic.png')}
-                        style={{ tintColor: recordAudio ? 'red' : '#406c74', ...styles.attachmentButton }}
-                      />
+                  <View >
+                    <TouchableOpacity style={styles.attachmentButton} onPress={() => setModalVisible(true)}>
+                      <Image source={require('../../assets/attach_file.png')} style={styles.attachmentIcon} />
                     </TouchableOpacity>
                   </View>
-                </>
-              )}
-            </View>
-            <TextInput
-              style={styles.input}
-              value={message}
-              onChangeText={setMessage}
-              placeholder="Type a message"
-              multiline
-            />
+                  <TextInput
+                    style={styles.input}
+                    value={message}
+                    onChangeText={setMessage}
+                    placeholder="Type a message"
+                    multiline
+                  /></> : <Text style={styles.recordingOnProgress}>Recording Initiated, Do a Long Press to Stop Audio.....</Text>}
+            </>
             {message.trim().length > 0 ? (
               <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
                 <Image source={require('../../assets/send_128.png')} style={styles.sendIcon} />
               </TouchableOpacity>
-            ) : null}
-          </View>
-          <View style={styles.poweredByContainer}>
-            <Text style={styles.poweredByText}>
-              Powered by <Image source={require('../../assets/logo_global.png')} style={styles.poweredByImage} />
-            </Text>
+            ) : (
+              <TouchableOpacity onPress={recordAlert} onLongPress={startAudio}>
+                <Image
+                  source={require('../../assets/mic.png')}
+                  style={{ tintColor: recordAudio ? 'red' : '#406c74', ...styles.attachmentButton1 }}
+                />
+              </TouchableOpacity>
+            )}
           </View>
           <BottomModalForIndividualChat />
         </SafeAreaView>
@@ -934,12 +942,12 @@ let styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    height: 80,
+    height: 60,
     backgroundColor: 'white',
     paddingHorizontal: 16,
     borderBottomColor: '#DDDDDD',
     borderBottomWidth: 1,
-    backgroundColor: '#047964'
+    backgroundColor: '#3c6e71'
   },
   backButton: {
     padding: 8,
@@ -954,8 +962,8 @@ let styles = StyleSheet.create({
     height: 24,
   },
   avatar: {
-    width: 45,
-    height: 45,
+    width: 40,
+    height: 40,
     borderRadius: 50,
     marginRight: 8,
   },
@@ -963,31 +971,33 @@ let styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: 'bold',
     color: 'white',
-    fontFamily: 'Open Sans'
+    paddingVertical: "2.5%",
   },
   subtitle: {
     fontSize: 14,
     color: 'white',
-    fontFamily: 'Open Sans'
+    fontFamily: 'inherit'
   },
   menuButton: {
     padding: 8,
   },
   contentContainer: {
     paddingHorizontal: 16,
-    paddingVertical: '10.5%',
+    paddingTop: "2%",
+    paddingBottom: "17%"
   },
   messageSent: {
-    backgroundColor: '#d9fdd3',
+    backgroundColor: '#d7ebec',
     alignSelf: 'flex-end',
     maxWidth: '80%',
     borderRadius: 8,
     padding: 8,
     marginBottom: 8,
-    borderTopRightRadius: 0
+    borderTopRightRadius: 0,
+    fontFamily: 'inherit'
   },
   messageReceived: {
     backgroundColor: 'white',
@@ -999,72 +1009,29 @@ let styles = StyleSheet.create({
     borderTopLeftRadius: 0
   },
   messageText: {
-    fontSize: 16,
+    fontSize: 14,
     color: 'black',
-    fontFamily: 'Open Sans'
+    fontFamily: 'inherit'
   },
   messageText1: {
-    fontSize: 16,
+    fontSize: 14,
     color: 'black',
-    fontFamily: 'Open Sans'
+    fontFamily: 'inherit'
   },
   timestampText: {
-    fontSize: 12,
+    fontSize: 10,
     color: 'gray',
     marginTop: 4,
     alignSelf: 'flex-end',
-    fontFamily: 'Open Sans'
+    fontFamily: 'inherit'
   },
   timestampText1: {
-    fontSize: 12,
+    fontSize: 10,
     color: 'gray',
     marginTop: 4,
     alignSelf: 'flex-end',
-    fontFamily: 'Open Sans'
+    fontFamily: 'inherit'
   },
-  // messageSent: {
-  //   backgroundColor: '#1e7eae',
-  //   alignSelf: 'flex-end',
-  //   maxWidth: '80%',
-  //   borderRadius: 8,
-  //   padding: 8,
-  //   marginBottom: 8,
-  //   color: 'white',
-  //   borderTopRightRadius: 0
-  // },
-  // messageReceived: {
-  //   backgroundColor: '#e1f5fe',
-  //   alignSelf: 'flex-start',
-  //   maxWidth: '80%',
-  //   borderRadius: 8,
-  //   padding: 8,
-  //   marginBottom: 8,
-  //   borderTopLeftRadius: 0
-  // },
-  // messageText: {
-  //   fontSize: 16,
-  //   color: 'white',
-  //   fontFamily: 'Open Sans'
-  // },
-  // messageText1: {
-  //   fontSize: 16,
-  //   color: 'black',
-  //   fontFamily: 'Open Sans'
-  // },
-  // timestampText: {
-  //   fontSize: 12,
-  //   color: 'white',
-  //   marginTop: 4,
-  //   alignSelf: 'flex-end',
-  //   fontFamily: 'Open Sans'
-  // },
-  // timestampText1: {
-  //   fontSize: 12,
-  //   color: 'black',
-  //   marginTop: 4,
-  //   alignSelf: 'flex-end',
-  //   fontFamily: 'Open Sans'
-  // },
   footercontainer: {
     position: 'absolute',
     bottom: 0,
@@ -1073,8 +1040,7 @@ let styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingVertical: 8,
     paddingHorizontal: 16,
-    marginBottom: 30,
-    backgroundColor: '#F5F5F5'
+    backgroundColor: 'whitesmoke'
   },
   attachmentButton: {
     marginRight: 16,
@@ -1090,9 +1056,8 @@ let styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     maxHeight: 150,
-  },
-  sendButton: {
-    marginLeft: 16,
+    marginRight: '5%',
+    fontFamily: 'inherit'
   },
   sendIcon: {
     width: 24,
@@ -1158,6 +1123,8 @@ let styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    borderBottomRightRadius: 0,
+    borderBottomLeftRadius: 0
   },
   button: {
     borderRadius: 20,
@@ -1174,40 +1141,36 @@ let styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#217eac',
+    borderColor: 'gray',
     marginTop: 10,
     width: "30%",
     marginBottom: 10,
   },
   submitButtonText: {
-    color: 'gray',
+    color: '#8599a2',
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 14,
-  },
-  poweredByContainer: {
-    alignItems: 'center',
-    marginTop: 10,
-    backgroundColor: 'white'
-  },
-  poweredByText: {
-    fontSize: 12,
-    color: 'gray',
-    marginBottom: 10
-  },
-  poweredByImage: {
-    width: 70,
-    height: 20,
-    marginLeft: 5,
+    marginTop: 7
   },
   imageIcon: {
-    width: 50,
-    height: 50,
-    marginLeft: 20,
-    marginRight: 20
+    width: 40,
+    height: 40,
+    marginLeft: 'auto',
+    marginRight: 'auto'
+  },
+  recordingOnProgress: {
+    flex: 1,
+    backgroundColor: 'whitesmoke',
+    borderRadius: 16,
+    paddingHorizontal: 1,
+    paddingVertical: 12,
+    maxHeight: 150,
+    marginRight: '5%',
+    color: 'black'
   },
   alertcontainer: {
-    backgroundColor: 'white',
+    backgroundColor: 'whitesmoke',
     borderRadius: 15,
     paddingVertical: 5,
     textAlign: 'center',
@@ -1219,8 +1182,8 @@ let styles = StyleSheet.create({
     marginBottom: 10
   },
   alerttext: {
-    color: 'gray',
-    fontSize: 15,
+    color: 'black',
+    fontSize: 12,
   },
 });
 
