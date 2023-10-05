@@ -43,7 +43,7 @@ class WebSocketClient {
     let url = Variables.API_URL.replace('http', 'ws') + '/actions';
     // 'https://qa.twixor.digital/moc'.replace('http', 'ws') + '/actions';
     console.log(url);
-    this.socketRef = null;
+    
     this.socketRef = new WebSocket(url, null, {
       headers,
     });
@@ -106,7 +106,10 @@ class WebSocketClient {
   }
 
   sendingMessage(message) {
+    console.log(this.socketRef)
     this.socketRef.send(JSON.stringify(message));
+    
+  
   }
 
   state = () => this.socketRef.readyState;
