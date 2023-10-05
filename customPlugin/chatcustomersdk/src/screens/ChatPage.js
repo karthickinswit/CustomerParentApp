@@ -23,7 +23,8 @@ import {
   PermissionsAndroid,
   ImageBackground,
   ToastAndroid,
-  BackHandler
+  BackHandler,
+  StatusBar
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 // import DateTimePicker from '@react-native-community/datetimepicker';
@@ -567,7 +568,7 @@ export const IndividualChat = ({ route }) => {
             />
           </TouchableOpacity> */}
           <View style={styles.leftContainer}>
-            {!chat.customerIconUrl || chat.customerIconUrl == "" ? (
+            {chat.customerIconUrl && chat.customerIconUrl == "" ? (
               <Image source={{ uri: chat.customerIconUrl }} style={styles.avatar} />
             ) : (
               <Image
@@ -726,9 +727,9 @@ export const IndividualChat = ({ route }) => {
       ) :
         <ScrollView
         >
-
-          <Text style={styles.messageText}>Please say hi to agent</Text>
-
+          <View style={styles.messageReceived}>
+            <Text style={styles.messageText}>Please say hi to agent</Text>
+          </View>
 
         </ScrollView>
     };
@@ -914,10 +915,12 @@ export const IndividualChat = ({ route }) => {
 
     isValidchat ? (
       <>
+        <StatusBar backgroundColor="#3c6e71" />
         <ChatHeader />
         {/* <DateUI /> */}
         <ChatBody />
         <ChatFooter />
+        <StatusBar backgroundColor="white" />
       </>
     ) : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <ActivityIndicator
@@ -1172,14 +1175,14 @@ let styles = StyleSheet.create({
   alertcontainer: {
     backgroundColor: 'whitesmoke',
     borderRadius: 15,
-    paddingVertical: 5,
+    paddingVertical: 2,
     textAlign: 'center',
     alignItems: 'center',
     width: '45%',
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginTop: 10,
-    marginBottom: 10
+    marginTop: 5,
+    marginBottom: 5
   },
   alerttext: {
     color: 'black',

@@ -16,7 +16,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Animated
+  Animated,
+  StatusBar 
 } from 'react-native';
 import Variables from './src/utils/variables';
 
@@ -292,6 +293,7 @@ const BlankPage = ({route}) => {
   return (
     <>
       <View style={styles.container}>
+      <StatusBar backgroundColor="green" />
         {/* <Text style={{marginBottom: 20}}> Hello {route.params.username} </Text>
         <ActivityIndicator size="large" color="#217eac" />
         <View>
