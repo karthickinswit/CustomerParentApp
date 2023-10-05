@@ -189,6 +189,7 @@ const onStopPlay = () => {
     countryCode : '+91',
     eId: 100,
     baseUrl: 'https://qa.twixor.digital/moc',
+    customerInfo : {}
   };
   console.log("Handl Login",propDetails);
 navigation.navigate('IndividualChat', {
@@ -269,49 +270,13 @@ navigation.navigate('IndividualChat', {
                   ) : isError ? (
                     'Error'
                   ) : (
-                    'Login'
+                    'Start Chat'
                   )}
                 </Text>
               </TouchableOpacity>
               
             )}
-             <TouchableOpacity
-               style={styles.submitButton1 }
-                onPress={onStartRecord}>
-                <Text style={styles.submitButtonText}>
-                  start record
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.submitButton1 }
-                onPress={onStopRecord}>
-                <Text style={styles.submitButtonText}>
-                  Stop Record
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.submitButton1 }
-                onPress={onStartPlay}>
-                <Text style={styles.submitButtonText}>
-                  start play
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.submitButton1 }
-                onPress={onPausePlay}>
-                <Text style={styles.submitButtonText}>
-                  Pause
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.submitButton1 }
-                onPress={onStopPlay}>
-                <Text style={styles.submitButtonText}>
-                  Stop play
-                </Text>
-              </TouchableOpacity>
-              <Text>Record Time: {recordTime}</Text>
-      <Text>Play Time: {playTime}</Text>
+             
     
               
              {/* <TouchableOpacity onPress={onStartRecord} style={styles.submitButton}> <Text style={styles.submitButtonText}> Start Record </Text></TouchableOpacity> 

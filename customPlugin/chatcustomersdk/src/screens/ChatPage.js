@@ -97,6 +97,46 @@ export const IndividualChat = ({ route }) => {
       scrollViewRef.current.scrollTo({ y: scrollViewHeight, animated: true });
     }
   };
+  const setupPingPong = () => {
+    if (heartbeatIntervalTimer !== null) {
+      clearInterval(heartbeatIntervalTimer);
+    }
+    setMissedHeartbeats(0);
+
+    const pingInterval = setInterval(() => {
+      try {
+        if (MISSED_HEARTBEATS >= MAX_MISSED_HEARTBEATS) {
+          console.log("Too many missed heartbeats. Reconnecting websocket");
+          clearInterval(pingInterval);
+          // Implement your close and connect logic here
+          return;
+        }
+        setMissedHeartbeats((prevMissed) => prevMissed + 1);
+        if(websocket.isConnected){
+          websocket.sendingMessage({"action": "ping"});
+        }
+        // Implement your sendMessage logic here
+      } catch (e) {
+        clearInterval(pingInterval);
+        console.log("Closing connection while heartbeat. Reason: " + e.message);
+        // Implement your close and connect logic here
+        websocket.close();
+        websocket.connect();
+      }
+    }, HEARTBEAT_INTERVAL_TIME);
+
+    setHeartbeatIntervalTimer(pingInterval);
+  };
+  
+  useEffect(() => {
+    setupPingPong(); // Initialize the ping-pong mechanism when the component mounts
+    return () => {
+      // Cleanup: clear the interval when the component unmounts
+      if (heartbeatIntervalTimer !== null) {
+        clearInterval(heartbeatIntervalTimer);
+      }
+    };
+  }, []);
   // useEffect(() => {
   //   // Scroll to the bottom whenever content size changes (e.g., when a new item is added)
   //   scrollToBottom();
@@ -209,8 +249,8 @@ export const IndividualChat = ({ route }) => {
   function handleBackButtonClick() {
     console.log('Navigation back button clicked');
     console.log(websocket)
-    socketListener.current.unsubscribe();
-    socketListener.current = null;
+    // socketListener.current.unsubscribe();
+    // socketListener.current = null;
     //websocket.socketRef = null;
     websocket.closeSocket();
     // WebSocketClient.instance = null;
@@ -332,6 +372,9 @@ export const IndividualChat = ({ route }) => {
               setChat(res);
               setIsValidChat(true);
               setUsers(users);
+              if(websocket.isConnected){
+                setSocketConnection(true);
+              }
               console.log("chat ", chat)
               //  console.log("chat res--> ",res);
             }
@@ -643,11 +686,10 @@ export const IndividualChat = ({ route }) => {
     const renderMessages = () => {
       console.log("Messages-->", chat.messages)
       return chat.messages ? chat.messages.map((item, index) => (
-        <ScrollView ref={scrollViewRef}
-          key={item.id}
-        >
+       
+        <View>
           {item.actionType == 0 ? (
-            <View style={styles.alertcontainer} key={item.actionId}>
+            <View style={styles.alertcontainer} key={0}>
               <Text style={styles.alerttext}>You Started a Chat</Text>
             </View>
           ) : <></>}
@@ -721,7 +763,7 @@ export const IndividualChat = ({ route }) => {
           {/* {item.imageSource ? (
             <Image source={{ uri: item.imageSource }} style={{ width: 150, height: 150 }} />
           ) : null} */}
-        </ScrollView>
+        </View>
       )
       ) :
         <ScrollView
@@ -788,7 +830,7 @@ export const IndividualChat = ({ route }) => {
         pickup: false,
       };
       console.log('send Object', chat['messages'] ? sendObject2 : sendObject1);
-      messageService.sendMessage(chat['messages'] ? sendObject2 : sendObject1);
+      websocket.sendingMessage(chat['messages'] ? sendObject2 : sendObject1);
       setMessage('');
       setImageSource(null);
     };
