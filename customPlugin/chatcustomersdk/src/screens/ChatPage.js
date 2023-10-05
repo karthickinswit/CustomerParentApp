@@ -804,7 +804,7 @@ export const IndividualChat = ({ route }) => {
           }}
           contentContainerStyle={styles.contentContainer}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshPage} />}>
-          {chat.messages.length > 0 ? renderMessages() : (
+          {chatData.messages.length > 0 ? renderMessages() : (
             <View style={[styles.loadercontainer, styles.loaderhorizontal]}>
               <ActivityIndicator size="large" color="#217eac" text="Loading Data" />
             </View>
@@ -952,7 +952,7 @@ export const IndividualChat = ({ route }) => {
             </>
             {message.trim().length > 0 ? (
               <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
-                <Image source={require('../../assets/send_128.png')} style={styles.sendIcon} />
+                <Image source={require('../../assets/send.png')} style={styles.sendIcon} />
               </TouchableOpacity>
             ) : (
               <TouchableOpacity onPress={recordAlert} onLongPress={startAudio}>
