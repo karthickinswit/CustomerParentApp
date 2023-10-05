@@ -920,7 +920,6 @@ export const IndividualChat = ({ route }) => {
         {/* <DateUI /> */}
         <ChatBody />
         <ChatFooter />
-        <StatusBar backgroundColor="white" />
       </>
     ) : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <ActivityIndicator
@@ -1178,7 +1177,8 @@ let styles = StyleSheet.create({
     paddingVertical: 2,
     textAlign: 'center',
     alignItems: 'center',
-    width: '45%',
+    width: 'auto',
+    paddingHorizontal: 15,
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: 5,
