@@ -185,7 +185,7 @@ const onStopPlay = () => {
  //   setIsLoading(true);
    // setIsError(false);
    const propDetails = {
-    customerId: '8190083902',
+    customerId: '9876543210',
     countryCode : '+91',
     eId: 100,
     baseUrl: 'https://qa.twixor.digital/moc',
