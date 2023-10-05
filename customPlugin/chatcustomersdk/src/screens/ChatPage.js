@@ -699,7 +699,7 @@ export const IndividualChat = ({ route }) => {
               <Text style={styles.messageText} >
                 {item.message}
               </Text>
-              <Text style={styles.timestampText}>
+              <Text style={styles.timestampText1}>
                 {timeConversion(item.actedOn)}
               </Text>
             </View>
@@ -787,7 +787,7 @@ export const IndividualChat = ({ route }) => {
           }}
           contentContainerStyle={styles.contentContainer}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshPage} />}>
-          {chatData.messages.length > 0 ? renderMessages() : (
+          {chat.messages.length > 0 ? renderMessages() : (
             <View style={[styles.loadercontainer, styles.loaderhorizontal]}>
               <ActivityIndicator size="large" color="#217eac" text="Loading Data" />
             </View>
