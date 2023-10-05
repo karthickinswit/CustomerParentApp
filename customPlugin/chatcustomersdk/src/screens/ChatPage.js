@@ -697,7 +697,7 @@ export const IndividualChat = ({ route }) => {
           {item.actionType == 1 ? (
             <View style={styles.messageSent} key={item.actionId}>
               <Text style={styles.messageText} >
-                {item.message}
+                {item.message.trim()}
               </Text>
               <Text style={styles.timestampText1}>
                 {timeConversion(item.actedOn)}
@@ -751,7 +751,7 @@ export const IndividualChat = ({ route }) => {
             ) : item.actionType == 3 ? (
               <View style={styles.messageReceived} key={item.actionId}>
                 <Text style={styles.messageText} >
-                  {item.message}
+                  {item.message.trim()}
                 </Text>
                 <Text style={styles.timestampText}>
                   {timeConversion(item.actedOn)}
