@@ -185,9 +185,9 @@ const onStopPlay = () => {
  //   setIsLoading(true);
    // setIsError(false);
    const propDetails = {
-    customerId: '9876543210',
+    customerId: customerId,
     countryCode : '+91',
-    eId: 100,
+    eId: parseFloat(eId),
     baseUrl: 'https://qa.twixor.digital/moc',
     customerInfo : {}
   };
@@ -248,8 +248,9 @@ navigation.navigate('IndividualChat', {
             <TextInput
               style={styles.input}
               placeholder="eId"
-              secureTextEntry={true}
+              // secureTextEntry={true}
               onChangeText={setEId}
+              keyboardType='numeric'
               value={eId}
             />
             {isError ? (

@@ -175,6 +175,13 @@ export const IndividualChat = ({ route }) => {
         if (route.params.userDetails.customerId == getOldCustomerId) {
           return true;
         }
+        else {
+          await AsyncStorage.setItem('eId', route.params.userDetails.eId.toString());
+          await AsyncStorage.setItem('customerId', route.params.userDetails.customerId);
+          await AsyncStorage.setItem('chatId', '');
+          await AsyncStorage.setItem('auth-token', '');
+          return true;
+        }
       }
       else {
         await AsyncStorage.setItem('eId', route.params.userDetails.eId.toString());
@@ -611,7 +618,7 @@ export const IndividualChat = ({ route }) => {
             />
           </TouchableOpacity> */}
           <View style={styles.leftContainer}>
-            {chat.customerIconUrl && chat.customerIconUrl == "" ? (
+            {chat.customerIconUrl && chat.customerIconUrl != "" ? (
               <Image source={{ uri: chat.customerIconUrl }} style={styles.avatar} />
             ) : (
               <Image
@@ -683,12 +690,22 @@ export const IndividualChat = ({ route }) => {
         scrollViewRef.current.scrollToEnd({ animated: true });
       }
     }, [chat.messages]);
-
+    function makeid(length) {
+      let result = '';
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      const charactersLength = characters.length;
+      let counter = 0;
+      while (counter < length) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        counter += 1;
+      }
+      return result;
+  }
     const renderMessages = () => {
       console.log("Messages-->", chat.messages)
       return chat.messages ? chat.messages.map((item, index) => (
        
-        <View>
+        <View key={makeid(6)}>
           {item.actionType == 0 ? (
             <View style={styles.alertcontainer} key={0}>
               <Text style={styles.alerttext}>You Started a Chat</Text>
@@ -699,7 +716,7 @@ export const IndividualChat = ({ route }) => {
               <Text style={styles.messageText} >
                 {item.message}
               </Text>
-              <Text style={styles.timestampText}>
+              <Text style={styles.timestampText1}>
                 {timeConversion(item.actedOn)}
               </Text>
             </View>
