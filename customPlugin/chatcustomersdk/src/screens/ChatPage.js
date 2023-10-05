@@ -804,7 +804,7 @@ export const IndividualChat = ({ route }) => {
           }}
           contentContainerStyle={styles.contentContainer}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshPage} />}>
-          {chatData.messages.length > 0 ? renderMessages() : (
+          {chat.messages.length > 0 ? renderMessages() : (
             <View style={[styles.loadercontainer, styles.loaderhorizontal]}>
               <ActivityIndicator size="large" color="#217eac" text="Loading Data" />
             </View>
@@ -979,7 +979,6 @@ export const IndividualChat = ({ route }) => {
         {/* <DateUI /> */}
         <ChatBody />
         <ChatFooter />
-        <StatusBar backgroundColor="white" />
       </>
     ) : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <ActivityIndicator
@@ -1237,7 +1236,8 @@ let styles = StyleSheet.create({
     paddingVertical: 2,
     textAlign: 'center',
     alignItems: 'center',
-    width: '45%',
+    width: 'auto',
+    paddingHorizontal: 15,
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: 5,
