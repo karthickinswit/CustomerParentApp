@@ -33,9 +33,7 @@ import ImagePicker from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { messageService } from '../services/websocket';
 import Variables from '../utils/variables';
-import websocket from '../services/websocket';
-
-import { registerApi, checkTokenApi, chatCreationApi, getChatInfo } from '../services/api';
+import websocket from '../services/websocket'; import { registerApi, checkTokenApi, chatCreationApi, getChatInfo } from '../services/api';
 
 const { height } = Dimensions.get('window');
 
@@ -789,7 +787,7 @@ export const IndividualChat = ({ route }) => {
       ) :
         <ScrollView>
           <View style={styles.messageReceived}>
-            <Text style={styles.messageText}>Please Type a Message to Initiate a Chat</Text>
+            <Text style={styles.messageText}>Hi! I'm your personal assistant to help you with Godrej related queries</Text>
             <Text style={styles.timestampText}>
               {null}
             </Text>
@@ -799,7 +797,7 @@ export const IndividualChat = ({ route }) => {
 
     return (
       <ImageBackground
-        source={require('../../assets/twixor_chat_bg.png')} // Replace with your actual image path
+        source={require('../../assets/twixor_chat_bg1.png')} // Replace with your actual image path
         style={{ flex: 1 }}>
         <ScrollView
           ref={scrollViewRef}
@@ -807,8 +805,8 @@ export const IndividualChat = ({ route }) => {
             scrollViewRef.current.scrollToEnd({ animated: true });
           }}
           contentContainerStyle={styles.contentContainer}
-          // refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshPage} />}
-          >
+        // refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshPage} />}
+        >
           {chatData.messages.length > 0 ? renderMessages() : (
             <View style={[styles.loadercontainer, styles.loaderhorizontal]}>
               <ActivityIndicator size="large" color="#217eac" text="Loading Data" />
@@ -943,7 +941,7 @@ export const IndividualChat = ({ route }) => {
               {switchRecord ?
                 <>
                   <View >
-                    <TouchableOpacity style={styles.attachmentButton} onPress={() => setModalVisible(true)}>
+                    <TouchableOpacity style={styles.attachmentButton1} onPress={() => setModalVisible(true)}>
                       <Image source={require('../../assets/attach_file.png')} style={styles.attachmentIcon} />
                     </TouchableOpacity>
                   </View>
@@ -953,17 +951,17 @@ export const IndividualChat = ({ route }) => {
                     onChangeText={setMessage}
                     placeholder="Type a message"
                     multiline
-                  /></> : <Text style={styles.recordingOnProgress}>Recording Initiated, Do a Long Press to Stop Audio.....</Text>}
+                  /></> : <Text style={styles.recordingOnProgress}>Recording started, Do a Long Press to Stop Audio</Text>}
             </>
             {message.trim().length > 0 ? (
               <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
                 <Image source={require('../../assets/send.png')} style={styles.sendIcon} />
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity onPress={recordAlert} onLongPress={startAudio}>
+              <TouchableOpacity onPress={recordAlert} onLongPress={startAudio} style={styles.attachmentButton}>
                 <Image
                   source={require('../../assets/mic.png')}
-                  style={{ tintColor: recordAudio ? 'red' : '#406c74', ...styles.attachmentButton1 }}
+                  style={{ tintColor: recordAudio ? 'red' : '#406c74', ...styles.attachmentIcon }}
                 />
               </TouchableOpacity>
             )}
@@ -1032,7 +1030,7 @@ let styles = StyleSheet.create({
     height: 40,
     borderRadius: 50,
     marginRight: 8,
-    objectFit : 'contain'
+    objectFit: 'contain'
   },
   textContainer: {
     justifyContent: 'center',
@@ -1106,15 +1104,18 @@ let styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
     backgroundColor: 'whitesmoke'
   },
   attachmentButton: {
-    marginRight: 16,
+    marginRight: 13,
+  },
+  attachmentButton1: {
+    marginLeft: 13,
   },
   attachmentIcon: {
-    width: 24,
-    height: 24,
+    width: 27,
+    height: 27,
   },
   input: {
     flex: 1,
@@ -1124,11 +1125,12 @@ let styles = StyleSheet.create({
     paddingVertical: 8,
     maxHeight: 150,
     marginRight: '5%',
+    marginLeft: '5%',
     fontFamily: 'inherit'
   },
   sendIcon: {
-    width: 30,
-    height: 30,
+    width: 42,
+    height: 42,
   },
   rightContainer: {
     flexDirection: 'row',
@@ -1221,8 +1223,8 @@ let styles = StyleSheet.create({
     marginTop: 7
   },
   imageIcon: {
-    width: 40,
-    height: 40,
+    width: 46,
+    height: 46,
     marginLeft: 'auto',
     marginRight: 'auto'
   },
@@ -1246,7 +1248,6 @@ let styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginTop: 2,
     marginBottom: 8
   },
   alerttext: {
