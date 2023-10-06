@@ -1,4 +1,3 @@
-
 import React, {
   useEffect,
   useState,
@@ -34,7 +33,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { messageService } from '../services/websocket';
 import Variables from '../utils/variables';
 import websocket from '../services/websocket'; import { registerApi, checkTokenApi, chatCreationApi, getChatInfo } from '../services/api';
-const myGif = require('../../assets/micstop1.gif');
 
 const { height } = Dimensions.get('window');
 
@@ -82,68 +80,51 @@ export const IndividualChat = ({ route }) => {
   const [heartbeatIntervalTimer, setHeartbeatIntervalTimer] = useState(null);
   const [MISSED_HEARTBEATS, setMissedHeartbeats] = useState(0);
 
-  const MAX_MISSED_HEARTBEATS = 2; // Replace with your actual value
-  const HEARTBEAT_INTERVAL_TIME = 30000; // Replace with your actual value
-  const heartbeat_msg = { "action": "ping" };; // Replace with your actual message
-
+  const MAX_MISSED_HEARTBEATS = 2;
+  const HEARTBEAT_INTERVAL_TIME = 30000;
 
   Variables.API_URL = route.params.userDetails.baseUrl;
   Variables.EID = route.params.userDetails.eId;
   Variables.MobileNum = route.params.userDetails.customerId;
   Variables.cCode = route.params.userDetails.countryCode;
-  const scrollToBottom = () => {
-    if (scrollViewRef.current) {
-      const scrollViewHeight = 1000; // Replace with the actual height of your ScrollView
-      scrollViewRef.current.scrollTo({ y: scrollViewHeight, animated: true });
-    }
-  };
+
   const setupPingPong = () => {
     if (heartbeatIntervalTimer !== null) {
       clearInterval(heartbeatIntervalTimer);
     }
     setMissedHeartbeats(0);
-
     const pingInterval = setInterval(() => {
       try {
         if (MISSED_HEARTBEATS >= MAX_MISSED_HEARTBEATS) {
           console.log("Too many missed heartbeats. Reconnecting websocket");
           clearInterval(pingInterval);
-          // Implement your close and connect logic here
           return;
         }
         setMissedHeartbeats((prevMissed) => prevMissed + 1);
         if (websocket.isConnected) {
           websocket.sendingMessage({ "action": "ping" });
         }
-        // Implement your sendMessage logic here
       } catch (e) {
         clearInterval(pingInterval);
         console.log("Closing connection while heartbeat. Reason: " + e.message);
-        // Implement your close and connect logic here
         websocket.close();
         websocket.connect();
       }
     }, HEARTBEAT_INTERVAL_TIME);
-
     setHeartbeatIntervalTimer(pingInterval);
   };
 
   useEffect(() => {
-    setupPingPong(); // Initialize the ping-pong mechanism when the component mounts
+    setupPingPong();
     return () => {
-      // Cleanup: clear the interval when the component unmounts
       if (heartbeatIntervalTimer !== null) {
         clearInterval(heartbeatIntervalTimer);
       }
     };
   }, []);
-  // useEffect(() => {
-  //   // Scroll to the bottom whenever content size changes (e.g., when a new item is added)
-  //   scrollToBottom();
-  // }, [chat]);
+
   function chatMessageUpdate(obj) {
     var res = obj.content[0].response;
-    var chatId = res.chat.chatId;
     var messages = res.chat.messages;
     var concatMesssgaes = [];
     var newChatMessages = [];
@@ -159,13 +140,14 @@ export const IndividualChat = ({ route }) => {
         ...new Map(concatMesssgaes.map(item => [item.actionId, item])).values(),
       ];
     }
-    chat['messages'] = concatMesssgaes //newChatMessages;
+    chat['messages'] = concatMesssgaes
     console.log(
       'After Updating current',
       JSON.stringify(chat.messages),
     );
 
   }
+
   const customerValidation = async () => {
     const getOldEid = await AsyncStorage.getItem('eId');
     const getOldCustomerId = await AsyncStorage.getItem('customerId');
@@ -198,12 +180,10 @@ export const IndividualChat = ({ route }) => {
       return true;
     }
   }
-  const setToken = async () => {
 
-    console.log("register token call 2");
+  const setToken = async () => {
     registerApi(Variables.MobileNum, Variables.cCode, Variables.EID)
       .then(async data => {
-        console.log("register token api--> ", data);
         var token = data.response.token;
         if (token) {
           await AsyncStorage.setItem('auth-token', token);
@@ -212,24 +192,16 @@ export const IndividualChat = ({ route }) => {
         }
       })
       .catch(error => console.error('Error:', error));
-
   };
+
   const checkToken = async () => {
     const storedToken = await AsyncStorage.getItem('auth-token');
-
-    console.log("Token -->", storedToken);
     if (storedToken && storedToken != '') {
       Variables.TOKEN = storedToken;
       checkTokenApi()
         .then(async data => {
-          console.log("Check token api--> ", data);
           if (data == true) {
             setIsTokenValid(true);
-            console.log(websocket);
-
-            // console.log('socket Instance', websocket.checkInstance());
-            // console.log('socket Instance2', websocket.checkConnection());
-            console.log(websocket.isConnected);
             if (!websocket.isConnected) {
               websocket.connect();
               websocket.waitForSocketConnection(() => { });
@@ -239,7 +211,6 @@ export const IndividualChat = ({ route }) => {
               websocket.connect();
               websocket.waitForSocketConnection(() => { });
             }
-
           }
           else if (data == false) {
             await setToken();
@@ -255,19 +226,10 @@ export const IndividualChat = ({ route }) => {
       setToken();
     }
   };
+
   function handleBackButtonClick() {
-    console.log('Navigation back button clicked');
-    console.log(websocket)
-    // socketListener.current.unsubscribe();
-    // socketListener.current = null;
-    //websocket.socketRef = null;
     websocket.closeSocket();
-    // WebSocketClient.instance = null;
     setSocketConnection(false);
-
-    console.log(websocket);
-
-
     return false;
   }
 
@@ -280,6 +242,7 @@ export const IndividualChat = ({ route }) => {
       );
     };
   }, []);
+
   useEffect(() => {
     customerValidation().then(data => {
       console.log("customerValidation --> ", data);
@@ -291,8 +254,8 @@ export const IndividualChat = ({ route }) => {
   useEffect(() => {
     chatIdValidation();
   }, [isTokenValid])
-  useEffect(() => {
 
+  useEffect(() => {
     socketListener.current = messageService.getMessage().subscribe(data => {
       console.log("Chatonm Socket", chat);
       var obj = JSON.parse(data);
@@ -304,13 +267,11 @@ export const IndividualChat = ({ route }) => {
           setSocketConnection(true);
           console.log("Connection is true");
         }
-
       } else if (obj.action === 'customerStartChat') {
         chatMessageUpdate(obj);
         setSocketResponse(obj);
       } else if (obj.action === 'agentPickupChat') {
         if (obj.content) {
-          var newChat = obj.content[0].response.chat;
           var users = obj.content[0].response.users;
           setUsers(users);
           chatMessageUpdate(obj);
@@ -335,13 +296,11 @@ export const IndividualChat = ({ route }) => {
       setSocketConnection(false);
     };
   }, [chat, isValidchat]);
+
   useEffect(() => {
-    // setIsTokenValid(false);
-
-
   }, [users]);
+
   useEffect(() => {
-    //setSocketConnection(isSocketConnected);
     setIsValidChat(isValidchat);
   }, [isValidchat, isSocketConnected])
 
@@ -351,10 +310,8 @@ export const IndividualChat = ({ route }) => {
         console.log('Chat Creation data-->', data);
         if (data.status) {
           let newChatId = data.response.chatId;
-
           setChatId(newChatId);
           await AsyncStorage.setItem('chatId', newChatId);
-          // setIsValidChat(false);
           await chatIdValidation();
         }
         else { console.log(data); }
@@ -647,46 +604,7 @@ export const IndividualChat = ({ route }) => {
   };
 
   const ChatBody = () => {
-    // const renderMessage = ({ item }) => {
-    //   return (
-    //     <ScrollView
-    //       style={
-    //         item.sender === 'me' ? styles.messageSent : styles.messageReceived
-    //       }>
-    //       {console.log(user)}
-    //       <Text style={styles.messageText}>{item.text.trim()}</Text>
-    //       <Text style={styles.timestampText}>{item.timestamp}</Text>
-    //       {item.imageSource ? <Image source={{ uri: item.imageSource }} style={{ width: 150, height: 150 }} /> : null}
-    //     </ScrollView>
-    //   );
-    // };
-
-    // return (
-    //   <FlatList
-    //     data={
-    //       chatData.messages.length > 0 ? (
-    //         chatData.messages.map(res => res)
-    //       ) : (
-    //         <View style={[styles.loadercontainer, styles.loaderhorizontal]}>
-    //           <ActivityIndicator
-    //             size="large"
-    //             color="#217eac"
-    //             text="Loading Data"
-    //           />
-    //         </View>
-    //       )
-    //     }
-    //     renderItem={renderMessage}
-    //     keyExtractor={item => user.id.toString()}
-    //     contentContainerStyle={styles.contentContainer}
-    //     refreshControl={
-    //       <RefreshControl refreshing={refreshing} onRefresh={refreshPage} />
-    //     }
-    //   />
-    // );
-
     const scrollViewRef = React.useRef();
-
     React.useEffect(() => {
       if (scrollViewRef.current) {
         scrollViewRef.current.scrollToEnd({ animated: true });
@@ -823,6 +741,17 @@ export const IndividualChat = ({ route }) => {
     const [recordAudio, setRecordAudio] = React.useState(false);
     const [switchRecord, setswitchRecord] = React.useState(true);
 
+    React.useEffect(() => {
+      async function saveInputData() {
+        try {
+          await AsyncStorage.setItem('message', message);
+        } catch (error) {
+          console.error('Error saving input data:', error);
+        }
+      }
+      saveInputData();
+    }, [message]);
+
     const handleSendMessage = () => {
       console.log(message);
 
@@ -935,7 +864,7 @@ export const IndividualChat = ({ route }) => {
     };
 
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'position' : 'height'}>
         <SafeAreaView style={{ backgroundColor: 'white' }}>
           <View style={styles.footercontainer}>
             <>
@@ -972,12 +901,10 @@ export const IndividualChat = ({ route }) => {
           <BottomModalForIndividualChat />
         </SafeAreaView>
       </KeyboardAvoidingView>
-
     );
   };
 
   return isSocketConnected ? (
-
     isValidchat ? (
       <>
         <StatusBar backgroundColor="#3c6e71" />
@@ -999,7 +926,7 @@ export const IndividualChat = ({ route }) => {
         hidesWhenStopped={isSocketConnected}
         size="large"
         color="#217eac"></ActivityIndicator>
-      <Text style={{ marginTop: 10 }}>Loading Connection</Text>
+      <Text style={{ marginTop: 10 }}>Connecting to Agent</Text>
     </View>
   );
 }
