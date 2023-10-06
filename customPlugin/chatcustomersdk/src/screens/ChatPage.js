@@ -113,8 +113,8 @@ export const IndividualChat = ({ route }) => {
           return;
         }
         setMissedHeartbeats((prevMissed) => prevMissed + 1);
-        if(websocket.isConnected){
-          websocket.sendingMessage({"action": "ping"});
+        if (websocket.isConnected) {
+          websocket.sendingMessage({ "action": "ping" });
         }
         // Implement your sendMessage logic here
       } catch (e) {
@@ -128,7 +128,7 @@ export const IndividualChat = ({ route }) => {
 
     setHeartbeatIntervalTimer(pingInterval);
   };
-  
+
   useEffect(() => {
     setupPingPong(); // Initialize the ping-pong mechanism when the component mounts
     return () => {
@@ -186,6 +186,7 @@ export const IndividualChat = ({ route }) => {
       else {
         await AsyncStorage.setItem('eId', route.params.userDetails.eId.toString());
         await AsyncStorage.setItem('customerId', route.params.userDetails.customerId);
+        await AsyncStorage.setItem('chatId', '');
         await AsyncStorage.setItem('auth-token', '');
         return true;
       }
@@ -193,6 +194,7 @@ export const IndividualChat = ({ route }) => {
     else {
       await AsyncStorage.setItem('eId', route.params.userDetails.eId.toString());
       await AsyncStorage.setItem('customerId', route.params.userDetails.customerId);
+      await AsyncStorage.setItem('chatId', '');
       await AsyncStorage.setItem('auth-token', '');
       return true;
     }
@@ -380,7 +382,7 @@ export const IndividualChat = ({ route }) => {
               setChat(res);
               setIsValidChat(true);
               setUsers(users);
-              if(websocket.isConnected){
+              if (websocket.isConnected) {
                 setSocketConnection(true);
               }
               console.log("chat ", chat)
@@ -622,9 +624,10 @@ export const IndividualChat = ({ route }) => {
               <Image source={{ uri: chat.customerIconUrl }} style={styles.avatar} />
             ) : (
               <Image
-                source={require('../../assets/boy_dummy.png')}
+                source={require('../../assets/Godrej_Logo.png')}
                 style={styles.avatar}
               />
+              // https://www.godrej.com/img/svg/godrej-logo.svg
             )}
             <View style={styles.textContainer}>
               <Text style={styles.title}>{chat.customerName}</Text>
@@ -700,11 +703,11 @@ export const IndividualChat = ({ route }) => {
         counter += 1;
       }
       return result;
-  }
+    }
     const renderMessages = () => {
       console.log("Messages-->", chat.messages)
       return chat.messages ? chat.messages.map((item, index) => (
-       
+
         <View key={makeid(6)}>
           {item.actionType == 0 ? (
             <View style={styles.alertcontainer} key={0}>
@@ -784,12 +787,13 @@ export const IndividualChat = ({ route }) => {
         </View>
       )
       ) :
-        <ScrollView
-        >
+        <ScrollView>
           <View style={styles.messageReceived}>
-            <Text style={styles.messageText}>Please say hi to agent</Text>
+            <Text style={styles.messageText}>Please Type a Message to Initiate a Chat</Text>
+            <Text style={styles.timestampText}>
+              {null}
+            </Text>
           </View>
-
         </ScrollView>
     };
 
@@ -803,7 +807,8 @@ export const IndividualChat = ({ route }) => {
             scrollViewRef.current.scrollToEnd({ animated: true });
           }}
           contentContainerStyle={styles.contentContainer}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshPage} />}>
+          // refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshPage} />}
+          >
           {chatData.messages.length > 0 ? renderMessages() : (
             <View style={[styles.loadercontainer, styles.loaderhorizontal]}>
               <ActivityIndicator size="large" color="#217eac" text="Loading Data" />
@@ -1027,6 +1032,7 @@ let styles = StyleSheet.create({
     height: 40,
     borderRadius: 50,
     marginRight: 8,
+    objectFit : 'contain'
   },
   textContainer: {
     justifyContent: 'center',
@@ -1121,8 +1127,8 @@ let styles = StyleSheet.create({
     fontFamily: 'inherit'
   },
   sendIcon: {
-    width: 24,
-    height: 24,
+    width: 30,
+    height: 30,
   },
   rightContainer: {
     flexDirection: 'row',
@@ -1240,8 +1246,8 @@ let styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginTop: 5,
-    marginBottom: 5
+    marginTop: 2,
+    marginBottom: 8
   },
   alerttext: {
     color: 'black',
