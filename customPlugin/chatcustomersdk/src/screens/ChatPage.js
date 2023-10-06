@@ -34,6 +34,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { messageService } from '../services/websocket';
 import Variables from '../utils/variables';
 import websocket from '../services/websocket'; import { registerApi, checkTokenApi, chatCreationApi, getChatInfo } from '../services/api';
+const myGif = require('../../assets/micstop1.gif');
 
 const { height } = Dimensions.get('window');
 
@@ -787,7 +788,7 @@ export const IndividualChat = ({ route }) => {
       ) :
         <ScrollView>
           <View style={styles.messageReceived}>
-            <Text style={styles.messageText}>Hi! I'm your personal assistant to help you with Godrej related queries</Text>
+            <Text style={styles.messageText}>Hi! I'm your personal assistant to help you with Some Doubts.</Text>
             <Text style={styles.timestampText}>
               {null}
             </Text>
@@ -958,12 +959,14 @@ export const IndividualChat = ({ route }) => {
                 <Image source={require('../../assets/send.png')} style={styles.sendIcon} />
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity onPress={recordAlert} onLongPress={startAudio} style={styles.attachmentButton}>
-                <Image
-                  source={require('../../assets/mic.png')}
-                  style={{ tintColor: recordAudio ? 'red' : '#406c74', ...styles.attachmentIcon }}
-                />
-              </TouchableOpacity>
+              <>
+                <TouchableOpacity onPress={recordAlert} onLongPress={startAudio} style={styles.attachmentButton}>
+                  <Image
+                    source={recordAudio ? require('../../assets/micstop1.gif') : require('../../assets/mic.png')}
+                    style={{ tintColor: recordAudio ? 'red' : '#406c74', ...styles.attachmentIcon }}
+                  />
+                </TouchableOpacity>
+              </>
             )}
           </View>
           <BottomModalForIndividualChat />
